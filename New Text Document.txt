@@ -1,0 +1,8 @@
+background: linear-gradient(90deg, #FF0000 0%, #7D9C00 100%), linear-gradient(238.72deg, #EBFF00 0%, #7700D5 100%), linear-gradient(64.82deg, #AD00FF 0%, #FF0000 100%), radial-gradient(100% 144.76% at 0% 0%, #FF0000 0%, #1400FF 100%), radial-gradient(100% 140% at 100% 0%, #A6FF60 0%, #2700C1 100%);
+background-blend-mode: overlay, color-dodge, difference, color-dodge, normal;
+
+
+https://fonts.google.com/specimen/Poppins?query=poppins
+
+
+https://github.com/sindresorhus/electron-store
