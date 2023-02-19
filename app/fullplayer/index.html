@@ -8,14 +8,74 @@
 <body>
     <div class="modal"></div>
 
-    <div class="topbar"></div>
+    <div class="topbar">
+        <div class="appicon-container">
+            <img id="btnAppicon" class="appicon" src="../src/icon/app/256x256.png" />
+        </div>
+        <div class="buttons">
+            <div id="btnMinimize" class="button"><img src="../src/icon/ui/minimize.png" /></div>
+            <div id="btnMaximize" class="button"><img src="../src/icon/ui/maximize.png" /></div>
+            <div id="btnClose" class="button"><img src="../src/icon/ui/close.png" /></div>
+        </div>
+    </div>
     
     <div class="bg-container inactive"></div>
 
     <div class="navbar"></div>
     <div class="main-panel"></div>
 
-    <div class="playbar"></div>
+    <div class="playbar">
+        <div class="bgimg"><img src="../src/img/playbar-bg.jpg" /></div>
+        <div class="controls">
+            <div class="details">
+                <!-- https://github.com/maxkueng/node-musicbrainz -->
+                <div class="track-art"></div>
+                <div class="track-details">
+                    <span class="track-name">Save Yourself</span>
+                    <span class="track-artist">Make Them Suffer</span>
+                </div>
+            </div>
+            <div class="action-center">
+                <div class="player-buttons">
+                    <div class="button shuffle">
+                        <img src="../src/icon/ui/shuffle.png" />
+                    </div>
+                    <div class="button skip-previous">
+                        <img src="../src/icon/ui/skip_previous.png" />
+                    </div>
+                    <div class="button play">
+                        <img src="../src/icon/ui/play.png" />
+                    </div>
+                    <div class="button skip-next">
+                        <img src="../src/icon/ui/skip_next.png" />
+                    </div>
+                    <div class="button repeat">
+                        <img src="../src/icon/ui/repeat.png" />
+                    </div>
+                </div>
+                <div class="player-timeline">
+                    <span class="time-elapsed">0:29</span>
+                    <div class="timeline">
+                        <input id="inpTimeline" class="slider" type="range" value="0" min="0" max="120" step="1" />
+                    </div>
+                    <span class="time-total">3:15</span>
+                </div>
+            </div>
+            <div class="extra-buttons">
+                <div class="volume-container">
+                    <div class="button volume-icon">
+                        <img src="../src/icon/ui/volume_mute.png" />
+                    </div>
+                    <div class="volume-slider">
+                        <input id="inpVolume" class="slider" type="range" value="0" min="0" max="100" step="1" />
+                    </div>
+                </div>
+                <div class="button miniplayer-switch">
+                    <img src="../src/icon/ui/miniplayer_switch.png" />
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../src/utils/animateBackground.js"></script>
     <script src="index.js"></script>

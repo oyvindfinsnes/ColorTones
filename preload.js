@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-    requestModuleComponent: componentName => ipcRenderer.invoke("requestModuleComponent", componentName)
+    minimizeWindow: () => ipcRenderer.send("minimizeWindow"),
+    maximizeWindow: () => ipcRenderer.send("maximizeWindow"),
+    closeWindow: () => ipcRenderer.send("closeWindow")
 });

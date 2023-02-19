@@ -12,10 +12,11 @@ const generateCubicBezier = () => {
 };
 
 const applyBackgroundAnimation = () => {
-    const totalLights = 15;
-    const softness = 100;
-    const animationDurationS = 20;
-    const colors = ["#e86138", "#c52d67", "#a14101"];
+    const totalLights = 25;
+    const size = 180;
+    const softness = 180;
+    const animationDurationS = 35;
+    const colors = ["#420e4e", "#9c1b37", "#d72227", "#fd751f"];
     const container = document.querySelector(".bg-container");
     const fragment = document.createDocumentFragment();
     let sheetContent = "";
@@ -38,7 +39,7 @@ const applyBackgroundAnimation = () => {
         
         const yAxis = generateCubicBezier();
         const color = colors[Math.floor(getRandomFloat(0, colors.length))];
-        sheetContent += `.bg-container>:nth-child(${i + 1})::after{width:20px;box-shadow:0 0 ${softness}px 100px ${color};animation:yAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${yAxis.x1},${yAxis.y1},${yAxis.x2},${yAxis.y2});}`;
+        sheetContent += `.bg-container>:nth-child(${i + 1})::after{width:30px;box-shadow:0 0 ${softness}px ${size}px ${color};animation:yAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${yAxis.x1},${yAxis.y1},${yAxis.x2},${yAxis.y2});}`;
 
         const moveToX = Math.floor(getRandomFloat(10, 90));
         const moveToY = Math.floor(getRandomFloat(10, 90));

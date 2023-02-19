@@ -11,8 +11,10 @@ const createMainWindow = () => {
     mainWindow = new BrowserWindow({
         show: false,
         frame: false,
-        width: 1000,
-        height: 600,
+        width: 1200,
+        height: 700,
+        minWidth: 650,
+        minHeight: 500,
         backgroundColor: "#222222",
         webPreferences: { preload: path.join(__dirname, "preload.js") }
     });
@@ -29,6 +31,11 @@ const createMainWindow = () => {
 
 const setup = () => {
     createMainWindow();
+    ipcMain.on("minimizeWindow", () => mainWindow.minimize());
+    ipcMain.on("maximizeWindow", () => {
+        mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+    });
+    ipcMain.on("closeWindow", () => mainWindow.close());
     //readdir(join(homedir(), "Desktop", "Music"), (err, res) => { console.log(res) });
 };
 

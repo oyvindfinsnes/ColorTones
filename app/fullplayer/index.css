@@ -1,5 +1,39 @@
 /* General styles =========================================================== */
 
+@font-face {
+    font-family: "Poppins";
+    font-weight: 400;
+    font-style: normal;
+    src: url("../src/font/poppins/Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins";
+    font-weight: 400;
+    font-style: italic;
+    src: url("../src/font/poppins/Italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Poppins";
+    font-weight: 700;
+    font-style: normal;
+    src: url("../src/font/poppins/Bold.woff2") format("woff2");
+}
+
+@keyframes infiniteScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-3200px); }
+}
+
+:root {
+    --active-color: #ff873c;
+    --active-color-from-filter: invert(56%) sepia(99%) saturate(818%) hue-rotate(332deg) brightness(101%) contrast(101%);
+    --primary-text-color: #ffffff;
+    --secondary-text-color: #cccccc;
+    --tertiary-text-color: #dddddd;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,9 +46,13 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    color: #ffffff;
-    box-sizing: border-box;
+    color: var(--primary-text-color);
+    font-family: "Poppins";
     background-color: #80232c;
+}
+
+.modal, .topbar, .navbar, .main-panel, .playbar {
+    box-sizing: border-box;
 }
 
 /* Modal ==================================================================== */
@@ -26,7 +64,57 @@ body {
 /* Topbar =================================================================== */
 
 .topbar {
+    -webkit-app-region: drag;
     position: absolute;
+    display: flex;
+    justify-content: space-between;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    z-index: 1000;
+}
+
+.topbar .appicon-container {
+    -webkit-app-region: none;
+    position: relative;
+    width: 40px;
+    height: 100%;
+    z-index: 10;
+}
+
+.topbar .appicon {
+    width: 20px;
+    height: auto;
+    padding: 5px;
+}
+
+.topbar .buttons {
+    -webkit-app-region: none;
+    height: 100%;
+    display: flex;
+}
+
+.topbar .buttons .button {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    opacity: 0.8;
+    padding: 0 15px;
+    transition: background 0.15s ease;
+}
+
+.topbar .buttons .button:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.topbar .buttons .button:last-child:hover {
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+.topbar .buttons .button img {
+    width: 18px;
+    height: auto;
 }
 
 /* Background =============================================================== */
@@ -49,7 +137,7 @@ body {
     width: 100%;
     height: 100%;
     backdrop-filter: blur(5px);
-    background-color: rgba(22, 22, 22, 0.4);
+    background-color: rgba(20, 20, 20, 0.4);
     z-index: 1;
 }
 
@@ -67,11 +155,177 @@ body {
 
 .playbar {
     position: absolute;
-    bottom: 30px;
-    left: 30px;
-    width: calc(100% - 60px);
-    height: 60px;
+    bottom: 15px;
+    left: 15px;
+    width: calc(100% - 30px);
+    height: 80px;
+    overflow: hidden;
     border-radius: 10px;
-    background-color: cornsilk;
+    background-color: rgba(100, 20, 20, 0.5);
     z-index: 10;
+}
+
+.playbar .bgimg img {
+    animation: infiniteScroll 110s linear infinite;
+}
+
+.playbar .controls {
+    position: absolute;
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1.5fr;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    backdrop-filter: blur(20px);
+}
+
+.playbar .controls .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.4);
+    --slider-filled-background-color: var(--primary-text-color);
+}
+
+.playbar .controls .slider:hover {
+    --slider-filled-background-color: var(--active-color);
+}
+
+.playbar .controls .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: grabbing;
+    width: 10px;
+    height: 10px;
+    border-radius: 14px;
+    background-color: #ffffff;
+}
+
+.playbar .controls .button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.playbar .controls .button:not(.active) {
+    opacity: 0.8;
+}
+
+.playbar .controls .button:hover {
+    opacity: 1;
+}
+
+.playbar .controls .button img {
+    width: 30px;
+    height: auto;
+    margin: 0 8px;
+}
+
+.playbar .controls .button.active img {
+    filter: var(--active-color-from-filter);
+}
+
+.playbar .controls .details {
+    display: flex;
+    align-items: center;
+    justify-self: left;
+}
+
+.playbar .controls .details .track-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.playbar .controls .details .track-details .track-name {
+    font-size: 14px;
+}
+
+.playbar .controls .details .track-details .track-artist {
+    font-size: 10px;
+    color: var(--tertiary-text-color);
+}
+
+.playbar .controls .action-center {
+    display: flex;
+    flex-direction: column;
+    justify-self: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.playbar .controls .action-center .player-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playbar .controls .action-center .player-buttons .play {
+    width: 36px;
+    height: 36px;
+    opacity: 1;
+    margin: 0 10px;
+    border-radius: 30px;
+    background-color: var(--primary-text-color);
+}
+
+.playbar .controls .action-center .player-buttons .play:hover {
+    transform: scale(1.05);
+}
+
+.playbar .controls .action-center .player-buttons .shuffle img,
+.playbar .controls .action-center .player-buttons .repeat img {
+    width: 22px;
+}
+
+.playbar .controls .action-center .player-timeline {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.playbar .controls .action-center .player-timeline span {
+    font-size: 12px;
+    color: var(--secondary-text-color);
+}
+
+.playbar .controls .action-center .player-timeline .timeline {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0 10px;
+}
+
+.playbar .controls .extra-buttons {
+    display: flex;
+    justify-self: right;
+}
+
+.playbar .controls .extra-buttons .volume-container {
+    display: flex;
+    align-items: center;
+}
+
+.playbar .controls .extra-buttons .volume-slider {
+    display: flex;
+    align-items: center;
+}
+
+.playbar .controls .extra-buttons .volume-container .volume-icon {
+    margin-right: -5px;
+}
+
+.playbar .controls .extra-buttons .miniplayer-switch {
+    margin-left: 20px;
+}
+
+.playbar .controls .extra-buttons .miniplayer-switch img {
+    width: 24px;
 }
