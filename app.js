@@ -31,11 +31,16 @@ const createMainWindow = () => {
 
 const setup = () => {
     createMainWindow();
+
     ipcMain.on("minimizeWindow", () => mainWindow.minimize());
     ipcMain.on("maximizeWindow", () => {
         mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
     });
     ipcMain.on("closeWindow", () => mainWindow.close());
+    ipcMain.handle("requestTemplate", async (e, name) => {
+        const templatePath = path.join(__dirname, "app", "templates", name + ".html");
+        return await fs.promises.readFile(templatePath, "utf8");
+    });
     //readdir(join(homedir(), "Desktop", "Music"), (err, res) => { console.log(res) });
 };
 
