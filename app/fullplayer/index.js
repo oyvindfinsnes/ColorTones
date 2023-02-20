@@ -1,4 +1,4 @@
-const { minimizeWindow, maximizeWindow, closeWindow, requestTemplate } = window.electronAPI;
+const utilities = new Utilities();
 
 // Handlers ====================================================================
 
@@ -25,9 +25,9 @@ const handleSliderChange = slider => {
 // Init ========================================================================
 
 const setupListeners = () => {
-    document.querySelector("#btnMinimize").addEventListener("click", () => minimizeWindow());
-    document.querySelector("#btnMaximize").addEventListener("click", () => maximizeWindow());
-    document.querySelector("#btnClose").addEventListener("click", () => closeWindow());
+    document.querySelector("#btnMinimize").addEventListener("click", () => window.electronAPI.minimizeWindow());
+    document.querySelector("#btnMaximize").addEventListener("click", () => window.electronAPI.maximizeWindow());
+    document.querySelector("#btnClose").addEventListener("click", () => window.electronAPI.closeWindow());
 
     [...document.querySelectorAll(".slider")].forEach(slider => {
         slider.addEventListener("input", () => handleSliderChange(slider));
@@ -36,9 +36,9 @@ const setupListeners = () => {
 
 const setup = async () => {
     setupListeners();
-    applyBackgroundAnimation();
+    utilities.applyBackgroundAnimation();
 
-    /* const thing = await requestTemplate("newSourceModal");
+    /* const thing = await window.electronAPI.requestTemplate("newSourceModal");
     document.querySelector(".modal").innerHTML = thing; */
 };
 
