@@ -4,21 +4,21 @@
     font-family: "Poppins";
     font-weight: 400;
     font-style: normal;
-    src: url("../src/font/poppins/Regular.woff2") format("woff2");
+    src: url("../assets/font/poppins/Regular.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "Poppins";
     font-weight: 400;
     font-style: italic;
-    src: url("../src/font/poppins/Italic.woff2") format("woff2");
+    src: url("../assets/font/poppins/Italic.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "Poppins";
     font-weight: 700;
     font-style: normal;
-    src: url("../src/font/poppins/Bold.woff2") format("woff2");
+    src: url("../assets/font/poppins/Bold.woff2") format("woff2");
 }
 
 @keyframes infiniteScroll {
