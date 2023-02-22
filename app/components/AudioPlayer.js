@@ -1,9 +1,12 @@
 class AudioPlayer {
     constructor() {
-        const audio = new Audio();
-        const standardQueue = [];
-        const shuffleQueue = [];
-        const trackHistory = [];
+        this.audio = new Audio();
+
+        this.standardQueue = [];
+        this.shuffleQueue = [];
+        this.trackHistory = [];
+        
+        this.audioSources = {};
 
         this.setup();
     }
@@ -14,7 +17,7 @@ class AudioPlayer {
 
     // Private members =========================================================
 
-    beforeExit() {
+    _beforeExit() {
         // save current track
     }
 
@@ -30,5 +33,18 @@ class AudioPlayer {
 
     skipPrevious() {
         /*  */
+    }
+
+    updateAudioSources(sources) {
+        if (Object.keys(sources).length > 0) {
+            this.audioSources = sources;
+            
+            /* this.audio.volume = 0.1;
+            const src = this.audioSources["Music"].basePath + "/" + this.audioSources["Music"]["5811200114387554"].fileName;
+            this.audio.src = src;
+            this.audio.play(); */
+        } else {
+            throw new Error("AudioPlayer.js: Sources invalid");
+        }
     }
 };

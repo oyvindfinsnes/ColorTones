@@ -1,9 +1,303 @@
 <style>
+    @keyframes infiniteLoading {
+        from { background-position: 0 0; }
+        to { background-position: -200% 0; }
+    }
+
     .modal .container {
+        position: relative;
+        width: 90vh;
+        height: 90vh;
+        padding: 20px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
+        background: radial-gradient(#202020, #151515);
+    }
+
+    .modal .container .modal-close {
+        position: absolute;
+        cursor: pointer;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: auto;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .modal .container .modal-close:hover {
+        opacity: 1;
+    }
+
+    .modal .container .content {
+        display: grid;
+        grid-template-rows: 1fr 1fr 1fr 2fr 3fr 1fr;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal .container .content .location-title {
+        width: 100%;
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .modal .container .content .location-subtitle {
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .modal .container .content .add-location,
+    .modal .container .content .location-submit {
+        cursor: pointer;
+        outline: none;
+        border: none;
+        width: 50%;
+        opacity: 1;
+        font-size: 14px;
+        padding: 15px 0;
+        font-weight: bold;
+        border-radius: 5px;
+        justify-self: center;
+        text-transform: uppercase;
+        transition: opacity 1s ease;
+        color: var(--primary-text-color);
+        background-color: var(--button-background-color);
+    }
+
+    .modal .container .content .location-submit.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    .modal .container .content .infinite-loader {
+        position: relative;
+        opacity: 1;
         width: 80%;
-        height: 80%;
-        background-color: aquamarine;
+        height: 10px;
+        overflow: hidden;
+        border-radius: 10px;
+        justify-self: center;
+        transition: opacity 1s ease;
+    }
+
+    .modal .container .content .infinite-loader::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, #9c1b37, #b82e37, #d24433, #e95b2c, #fd751f, #e95b2c, #d24433, #b82e37, #9c1b37);
+        background-size: 200% 100%;
+        animation: infiniteLoading 3s linear infinite;
+    }
+    
+    .modal .container .content .file-data,
+    .modal .container .content .reverse-order {
+        opacity: 1;
+        transition: opacity 1s ease;
+    }
+
+    .modal .container .content .file-data.inactive,
+    .modal .container .content .reverse-order.inactive,
+    .modal .container .content .infinite-loader.inactive {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .modal .container .content .file-data .highlighted,
+    .modal .container .content .reverse-order .highlighted {
+        color: var(--active-color);
+    }
+
+    .modal .container .content .file-data > div,
+    .modal .container .content .reverse-order > div {
+        display: flex;
+        align-items: center;
+    }
+
+    input[type="radio"] {
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+        display: grid;
+        place-content: center;
+        font-family: inherit;
+        color: var(--primary-text-color);
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+        border-radius: 50%;
+        border: 1px solid var(--button-background-color);
+    }
+
+    input[type="radio"]::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.2s ease;
+        background-color: var(--button-background-color);
+    }
+
+    input[type="radio"]:checked::before {
+        transform: scale(1);
+    }
+
+    input[type="radio"] + label {
+        cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+        transition: background 0.2s ease;
+        border: 1px solid var(--button-background-color);
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: var(--button-background-color);
+    }
+
+    input[type="checkbox"] + label {
+        cursor: pointer;
+    }
+
+    .modal .container .content .reverse-order .example-filename {
+        display: block;
+        font-size: 18px;
+        margin-top: 5px;
+        color: #aaaaaa;
+        text-align: center;
     }
 </style>
 
-<div class="container">Content</div>
+<div class="container">
+    <img class="modal-close" src="../assets/icon/ui/close.png" />
+
+    <div class="content">
+        <span class="location-title">Add a new source to your library</span>
+
+        <input class="add-location" type="button" value="pick folder" />
+        
+        <div class="infinite-loader inactive"></div>
+
+        <div class="file-data inactive">
+            <span class="location-subtitle">Some or all of the files in the selected folder are missing crucial metadata. Select an option below so that we can derive this data using the file names instead.</span>
+            <div>
+                <input id="inpTrack" type="radio" name="fileData" />
+                <label for="inpTrack">The file names only contain the <span class="highlighted">track name</span></label>
+            </div>
+            <div>
+                <input id="inpArtist" type="radio" name="fileData" />
+                <label for="inpArtist">The file names only contain the <span class="highlighted">artist name</span></label>
+            </div>
+            <div>
+                <input id="inpTrackArtist" type="radio" name="fileData" />
+                <label for="inpTrackArtist">The file names contain both the <span class="highlighted">artist and track name</span></label>
+            </div>
+        </div>
+
+        <div class="reverse-order inactive">
+            <span class="location-subtitle">Use the example file name below to determine if:</span>
+            <div>
+                <input id="inpReverseOrder" type="checkbox" />
+                <label for="inpReverseOrder">artist and track name should be <span class="highlighted">reversed?</span></label>
+            </div>
+            <span class="example-filename" data-content=""></span>
+        </div>
+
+        <input class="location-submit disabled" type="button" value="Finish" />
+    </div>
+</div>
+
+<script>
+    document.querySelector(".modal-close").addEventListener("click", () => {
+        document.querySelector(".modal").innerHTML = "";
+        document.querySelector(".modal").classList.remove("active");
+        [...document.querySelectorAll("script")].forEach(script => {
+            if (script.id !== "") document.body.removeChild(script);
+        });
+    });
+
+    document.querySelector(".add-location").addEventListener("click", async () => {
+        document.querySelector(".file-data").classList.add("inactive");
+        [...document.querySelectorAll("input[name='fileData']")].forEach(radio => {
+            radio.checked = false;
+        });
+        document.querySelector("#inpReverseOrder").checked = false;
+        document.querySelector(".reverse-order").classList.add("inactive");
+        document.querySelector(".location-submit").classList.add("disabled");
+
+        document.querySelector(".infinite-loader").classList.remove("inactive");
+
+        const { targetDir, pickedExample } = await window.electronAPI.folderSelectSource();
+
+        if (targetDir !== null) {
+            document.querySelector(".infinite-loader").classList.add("inactive");
+
+            if (pickedExample !== null) {
+                document.querySelector(".file-data").classList.remove("inactive");
+                document.querySelector(".example-filename").textContent = pickedExample;
+                document.querySelector(".example-filename").dataset.content = pickedExample;
+            } else {
+                document.querySelector(".location-submit").classList.remove("disabled");
+            }
+
+            document.querySelector(".container").dataset.targetDir = targetDir;
+        } else {
+            document.querySelector(".infinite-loader").classList.add("inactive");
+        }
+    });
+
+    [...document.querySelectorAll("input[name='fileData']")].forEach(radio => {
+        radio.addEventListener("change", e => {
+            if (e.currentTarget.id === "inpTrack" || e.currentTarget.id === "inpArtist") {
+                document.querySelector('.reverse-order').classList.add('inactive');
+            } else {
+                document.querySelector('.reverse-order').classList.remove('inactive');
+            }
+
+            document.querySelector('.location-submit').classList.remove('disabled');
+        });
+    });
+
+    document.querySelector("#inpReverseOrder").addEventListener("change", () => {
+        const example = document.querySelector(".example-filename");
+                    
+        if (document.querySelector("#inpReverseOrder").checked) {
+            example.textContent = example.dataset.content.split("-").reverse().join(" - ");
+        } else {
+            example.textContent = example.dataset.content;
+        }
+    });
+
+    document.querySelector(".location-submit").addEventListener("click", async () => {
+        let checkedRadioID = null;
+        const inpReversed = document.querySelector("#inpReverseOrder");
+        const isReversed = inpReversed.checked;
+
+        [...document.querySelectorAll("input[name='fileData']")].forEach(radio => {
+            if (radio.checked) checkedRadioID = radio.id;
+        });
+
+        
+        if (document.querySelector(".container").dataset.hasOwnProperty("targetDir")) {
+            const details = {
+                detail: {
+                    checkedRadioID,
+                    isReversed,
+                    targetDir: document.querySelector(".container").dataset.targetDir
+                }
+            };
+
+            window.dispatchEvent(new window.CustomEvent("modalAddSourceFinished", details));
+        }
+    });
+</script>
