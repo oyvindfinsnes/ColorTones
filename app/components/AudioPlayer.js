@@ -1,5 +1,5 @@
 class AudioPlayer {
-    constructor() {
+    static init() {
         this.PLAYMODE_STANDARD = "standard";
         this.PLAYMODE_SHUFFLE = "shuffle";
         
@@ -13,21 +13,15 @@ class AudioPlayer {
         this.playMode = this.PLAYMODE_STANDARD;
         
         this.isPlaystateFading = false;
-
-        this.setup();
-    }
-
-    setup() {
-        this.audio.volume = this.volume;
     }
 
     // Private members =========================================================
 
-    _beforeExit() {
+    static _beforeExit() {
         // save current track
     }
 
-    _generateQueues(regenerate = false) {
+    static _generateQueues(regenerate = false) {
         const generatedItems = 20;
         const shuffleQueue = [];
         const standardQueue = [];
@@ -55,7 +49,7 @@ class AudioPlayer {
         }
     }
 
-    _pickNextTrack() {
+    static _pickNextTrack() {
         if (this.playMode === this.PLAYMODE_STANDARD) {
             const nextItem = this.standardQueue.shift();
             this.trackHistory.push(nextItem);
@@ -63,13 +57,13 @@ class AudioPlayer {
         }
     }
 
-    _getAudioSrcFromTrackID(id) {
+    static _getAudioSrcFromTrackID(id) {
         const baseName = this.audioSources[this.currentSource].basePath;
         const fileName = this.audioSources[this.currentSource].tracks[id].fileName;
         return baseName + "/" + fileName;
     }
 
-    _handlePlaystateFading(operator) {
+    static _handlePlaystateFading(operator) {
         const step = this.volume / 10;
 
         const fadeOut = () => {
@@ -102,7 +96,7 @@ class AudioPlayer {
 
     // Public members ==========================================================
     
-    setVolume(value, isFloat = false) {
+    static setVolume(value, isFloat = false) {
         if (this.isPlaystateFading) return false;
 
         if (isFloat) {
@@ -118,7 +112,7 @@ class AudioPlayer {
         }
     }
 
-    togglePlaystate() {
+    static togglePlaystate() {
         if (this.isPlaystateFading) return false;
 
         if (this.audio.paused) {
@@ -134,20 +128,20 @@ class AudioPlayer {
         }
     }
 
-    skipNext() {
+    static skipNext() {
         /*  */
     }
 
-    skipPrevious() {
+    static skipPrevious() {
         /*  */
     }
 
-    updateCurrentSource(source) {
+    static updateCurrentSource(source) {
         this.currentSource = source;
         this._generateQueues(true);
     }
 
-    updateAudioSources(sources) {
+    static updateAudioSources(sources) {
         if (Object.keys(sources).length > 0) {
             this.audioSources = sources;
         } else {

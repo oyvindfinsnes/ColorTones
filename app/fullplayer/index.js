@@ -1,7 +1,3 @@
-const utilities = new Utilities();
-const audioPlayer = new AudioPlayer();
-let audioSources = {};
-
 // Handlers ====================================================================
 
 const handleModalOpen = async templateName => {
@@ -35,14 +31,14 @@ const handleModalAddSourceFinished = async e => {
     
     const { checkedRadioID, isReversed, targetDir } = e.detail;
 
-    audioSources = await window.electronAPI.finalizeSourceFiles(checkedRadioID, isReversed, targetDir);
-    audioPlayer.updateAudioSources(audioSources);
-    audioPlayer.updateCurrentSource(targetDir);
+    const sources = await window.electronAPI.finalizeSourceFiles(checkedRadioID, isReversed, targetDir);
+    AudioPlayer.updateAudioSources(sources);
+    AudioPlayer.updateCurrentSource(targetDir);
 };
 
 const handleSliderChange = slider => {
     if (slider.id === "inpVolume") {
-        audioPlayer.setVolume(document.querySelector("#inpVolume").value);
+        AudioPlayer.setVolume(document.querySelector("#inpVolume").value);
     }
 
     const percent = (parseInt(slider.value) / parseInt(slider.max)) * 100;
@@ -57,9 +53,9 @@ const handleSliderChange = slider => {
 };
 
 const handlePlaystate = () => {
-    const paused = audioPlayer.audio.paused;
+    const paused = AudioPlayer.audio.paused;
 
-    audioPlayer.togglePlaystate();
+    AudioPlayer.togglePlaystate();
 };
 
 // Init ========================================================================
@@ -105,10 +101,16 @@ const disableBuiltinMediaKeys = () => {
     navigator.mediaSession.setActionHandler("nexttrack", () => { return false });
 };
 
+const initComponents = () => {
+    AudioPlayer.init();
+    UserInterface.init();
+}
+
 const setup = async () => {
+    initComponents();
     setupListeners();
     disableBuiltinMediaKeys();
-    utilities.applyBackgroundAnimation();
+    Utilities.applyBackgroundAnimation();
 };
 
 window.addEventListener("DOMContentLoaded", () => setup());

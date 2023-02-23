@@ -1,11 +1,11 @@
 class Utilities {
     // Private members =========================================================
 
-    _getRandomFloat(min, max) {
+    static _getRandomFloat(min, max) {
         return (Math.random() * (max - min) + min);
     }
     
-    _generateCubicBezier() {
+    static _generateCubicBezier() {
         return {
             x1: parseFloat(this._getRandomFloat(0, 1).toFixed(2)),
             y1: parseFloat(this._getRandomFloat(-2, 2).toFixed(2)),
@@ -16,7 +16,7 @@ class Utilities {
 
     // Public members ==========================================================
     
-    applyBackgroundAnimation() {
+    static applyBackgroundAnimation() {
         const totalLights = 25;
         const size = 180;
         const softness = 180;
@@ -61,7 +61,7 @@ class Utilities {
         container.classList.remove("inactive");
     }
     
-    removeBackgroundAnimation() {
+    static removeBackgroundAnimation() {
         const container = document.querySelector(".bg-container");
     
         container.ontransitionend = () => {
