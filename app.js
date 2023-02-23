@@ -14,7 +14,7 @@ const handleReadSourceFilesData = async dir => {
     const targetDir = path.basename(dir);
 
     // Make a new config or reset the existing data
-    sources[targetDir] = { basePath: dir };
+    sources[targetDir] = { basePath: dir, tracks: {}, type: "source" };
 
     for (const audioFile of audioFiles) {
         const fileHash = createHash(audioFile);
@@ -34,7 +34,7 @@ const handleReadSourceFilesData = async dir => {
                 obj["unfinished"] = true;
             }
 
-            sources[targetDir][fileHash] = obj;
+            sources[targetDir].tracks[fileHash] = obj;
         } catch {
             // The file probably wasn't music, or not supported (very unlikely)
         }
@@ -43,8 +43,8 @@ const handleReadSourceFilesData = async dir => {
     let pickedExample = null;
     const regex = new RegExp(/\.[^/.]+$/);
 
-    Object.keys(sources[targetDir]).find(trackID => {
-        const target = sources[targetDir][trackID];
+    Object.keys(sources[targetDir].tracks).find(trackID => {
+        const target = sources[targetDir].tracks[trackID];
         if (target.hasOwnProperty("unfinished")) {
             pickedExample = target.fileName.replace(regex, "");
             return;
@@ -64,18 +64,18 @@ const handleFolderSelectSource = async () => {
 };
 
 const handleFinalizeSourceFiles = async (checkedRadioID, isReversed, targetDir) => {
-    Object.keys(sources[targetDir]).forEach(trackID => {
-        const target = sources[targetDir][trackID];
+    Object.keys(sources[targetDir].tracks).forEach(trackID => {
+        const target = sources[targetDir].tracks[trackID];
         if (target.hasOwnProperty("unfinished")) {
-            delete sources[targetDir][trackID]["unfinished"];
-            const fileName = path.parse(sources[targetDir][trackID].fileName).name;
+            delete sources[targetDir].tracks[trackID]["unfinished"];
+            const fileName = path.parse(sources[targetDir].tracks[trackID].fileName).name;
             
             switch (checkedRadioID) {
                 case "inpTrack":
-                    sources[targetDir][trackID].title = fileName.trim();
+                    sources[targetDir].tracks[trackID].title = fileName.trim();
                     break;
                 case "inpArtist":
-                    sources[targetDir][trackID].artist = fileName.trim();
+                    sources[targetDir].tracks[trackID].artist = fileName.trim();
                     break;
                 case "inpTrackArtist":
                     let parts = fileName.split("-");
@@ -87,11 +87,11 @@ const handleFinalizeSourceFiles = async (checkedRadioID, isReversed, targetDir) 
                     }
 
                     if (isReversed) {
-                        sources[targetDir][trackID].title = parts[0].trim();
-                        sources[targetDir][trackID].artist = parts[1].trim();
+                        sources[targetDir].tracks[trackID].title = parts[0].trim();
+                        sources[targetDir].tracks[trackID].artist = parts[1].trim();
                     } else {
-                        sources[targetDir][trackID].title = parts[1].trim();
-                        sources[targetDir][trackID].artist = parts[0].trim();
+                        sources[targetDir].tracks[trackID].title = parts[1].trim();
+                        sources[targetDir].tracks[trackID].artist = parts[0].trim();
                     }
                     break;
             }

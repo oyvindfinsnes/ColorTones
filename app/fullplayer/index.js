@@ -37,9 +37,14 @@ const handleModalAddSourceFinished = async e => {
 
     audioSources = await window.electronAPI.finalizeSourceFiles(checkedRadioID, isReversed, targetDir);
     audioPlayer.updateAudioSources(audioSources);
+    audioPlayer.updateCurrentSource(targetDir);
 };
 
 const handleSliderChange = slider => {
+    if (slider.id === "inpVolume") {
+        audioPlayer.setVolume(document.querySelector("#inpVolume").value);
+    }
+
     const percent = (parseInt(slider.value) / parseInt(slider.max)) * 100;
     const parts = [
         "var(--slider-filled-background-color) 0%",
@@ -49,6 +54,12 @@ const handleSliderChange = slider => {
     ];
 
     slider.setAttribute("style",  `background: linear-gradient(to right, ${parts.join(",")})`);
+};
+
+const handlePlaystate = () => {
+    const paused = audioPlayer.audio.paused;
+
+    audioPlayer.togglePlaystate();
 };
 
 // Init ========================================================================
@@ -79,10 +90,24 @@ const setupListeners = () => {
     [...document.querySelectorAll(".slider")].forEach(slider => {
         slider.addEventListener("input", () => handleSliderChange(slider));
     });
+
+    document.querySelector(".button.play").addEventListener("click", () => {
+        handlePlaystate();
+    });
+};
+
+const disableBuiltinMediaKeys = () => {
+    navigator.mediaSession.setActionHandler("play", () => { return false });
+    navigator.mediaSession.setActionHandler("pause", () => { return false });
+    navigator.mediaSession.setActionHandler("seekbackward", () => { return false });
+    navigator.mediaSession.setActionHandler("seekforward", () => { return false });
+    navigator.mediaSession.setActionHandler("previoustrack", () => { return false });
+    navigator.mediaSession.setActionHandler("nexttrack", () => { return false });
 };
 
 const setup = async () => {
     setupListeners();
+    disableBuiltinMediaKeys();
     utilities.applyBackgroundAnimation();
 };
 
