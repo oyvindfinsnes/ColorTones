@@ -9,6 +9,7 @@ class AudioPlayer {
         this.shuffleQueue = [];
         this.trackHistory = [];        
         this.audioSources = {};
+        this.currentIndex = 0;
         this.currentSource = null;
         this.playMode = this.PLAYMODE_STANDARD;
         
@@ -49,15 +50,29 @@ class AudioPlayer {
         }
     }
 
-    static _pickNextTrack() {
-        if (this.playMode === this.PLAYMODE_STANDARD) {
-            const nextItem = this.standardQueue.shift();
-            this.trackHistory.push(nextItem);
-            return nextItem;
+    static _pickPreviousTrack() {
+        if (this.currentIndex < this.trackHistory.length - 1) {
+            this.currentIndex++;
+            return this._getTrackPath(this.trackHistory[this.currentIndex]);
         }
+
+        return false;
     }
 
-    static _getAudioSrcFromTrackID(id) {
+    static _pickNextTrack() {
+        if (this.currentIndex === 0) {
+            if (this.playMode === this.PLAYMODE_STANDARD) {
+                const nextItem = this.standardQueue.shift();
+                this.trackHistory.unshift(nextItem);
+            }
+        } else {
+            this.currentIndex--;
+        }
+
+        return this._getTrackPath(this.trackHistory[this.currentIndex]);
+    }
+
+    static _getTrackPath(id) {
         const baseName = this.audioSources[this.currentSource].basePath;
         const fileName = this.audioSources[this.currentSource].tracks[id].fileName;
         return baseName + "/" + fileName;
@@ -96,6 +111,11 @@ class AudioPlayer {
 
     // Public members ==========================================================
     
+    static getCurrentTrackDetails() {
+        const currentTrack = this.trackHistory[this.currentIndex];
+        return this.audioSources[this.currentSource].tracks[currentTrack];
+    }
+
     static setVolume(value, isFloat = false) {
         if (this.isPlaystateFading) return false;
 
@@ -112,28 +132,40 @@ class AudioPlayer {
         }
     }
 
+    static skipPrevious() {
+        const track = this._pickPreviousTrack();
+        
+        if (track) {
+            this.audio.src = track;
+            this._handlePlaystateFading("+");
+        }
+    }
+
     static togglePlaystate() {
         if (this.isPlaystateFading) return false;
 
         if (this.audio.paused) {
-            if (this.audio.src === "") {
-                const nextTrackID = this._pickNextTrack();
-                const audioSrc = this._getAudioSrcFromTrackID(nextTrackID);
-                this.audio.src = audioSrc;
+            if (this.audio.src !== "") {
+                this._handlePlaystateFading("+");
+            } else {
+                this.skipNext();
             }
-
-            this._handlePlaystateFading("+");
         } else {
             this._handlePlaystateFading("-");
         }
     }
 
     static skipNext() {
-        /*  */
-    }
+        const track = this._pickNextTrack();
+        
+        if (track) {
+            this.audio.src = track;
+            this._handlePlaystateFading("+");
+        }
 
-    static skipPrevious() {
-        /*  */
+        if (this.standardQueue.length <= 5 || this.shuffleQueue.length <= 5) {
+            this._generateQueues();
+        }
     }
 
     static updateCurrentSource(source) {
@@ -144,8 +176,6 @@ class AudioPlayer {
     static updateAudioSources(sources) {
         if (Object.keys(sources).length > 0) {
             this.audioSources = sources;
-        } else {
-            throw new Error("AudioPlayer.js: Sources invalid");
         }
     }
 };

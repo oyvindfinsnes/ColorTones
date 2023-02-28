@@ -259,8 +259,8 @@ body {
 .playbar .controls .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 10px;
-    height: 10px;
+    width: 0;
+    height: 0;
     border-radius: 14px;
     background-color: #ffffff;
 }
@@ -302,7 +302,7 @@ body {
     flex-direction: column;
 }
 
-.playbar .controls .details .track-details .track-name {
+.playbar .controls .details .track-details .track-title {
     font-size: 14px;
 }
 
@@ -374,10 +374,11 @@ body {
 .playbar .controls .extra-buttons .volume-slider {
     display: flex;
     align-items: center;
+    margin-left: 5px;
 }
 
-.playbar .controls .extra-buttons .volume-container .volume-icon {
-    margin-right: -5px;
+.playbar .controls .extra-buttons .volume-container .volume-icon img {
+    margin: 0;
 }
 
 .playbar .controls .extra-buttons .miniplayer-switch {
