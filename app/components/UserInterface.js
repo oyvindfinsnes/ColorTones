@@ -9,6 +9,9 @@ class UserInterface {
         this.btnSkipPrevious = document.querySelector("#btnSkipPrevious");
         this.btnPlay = document.querySelector("#btnPlay");
         this.btnSkipNext = document.querySelector("#btnSkipNext");
+        this.inpVolume = document.querySelector("#inpVolume");
+
+        this.isTimelineSeeking = false;
 
         this._setupListeners();
     }
@@ -33,7 +36,9 @@ class UserInterface {
         UserInterface.btnPlay.addEventListener("click", () => UserInterface.Playbar.handlePlaystate());
         UserInterface.btnSkipNext.addEventListener("click", () => UserInterface.Playbar.handleSkipNext());
 
-        [...document.querySelectorAll(".slider")].forEach(slider => { slider.addEventListener("input", () => UserInterface.Playbar.handleSliderChange(slider)) });
+        UserInterface.inpTimeline.addEventListener("mousedown", () => UserInterface.isTimelineSeeking = true);
+        UserInterface.inpTimeline.addEventListener("change", () => UserInterface.Playbar.handleTimelineChange());
+        [...document.querySelectorAll(".slider")].forEach(slider => { slider.addEventListener("input", e => UserInterface.Playbar.handleSliderChange(e)) });
     }
 
     static _formatSecondsToTimestamp(seconds) {
@@ -100,9 +105,12 @@ class UserInterface {
         }
 
         static handleTimelineUpdate() {
-            const elapsed = AudioPlayer.audio.currentTime;
-            UserInterface.inpTimeline.value = elapsed;
-            UserInterface.inpTimeline.dispatchEvent(new Event("input"));
+            if (!UserInterface.isTimelineSeeking) {
+                const elapsed = AudioPlayer.audio.currentTime;
+                
+                UserInterface.inpTimeline.value = elapsed;
+                UserInterface.inpTimeline.dispatchEvent(new Event("input"));
+            }
         }
 
         static handleSkipPrevious() {
@@ -119,20 +127,28 @@ class UserInterface {
             AudioPlayer.skipNext();
         }
 
-        static handleSliderChange(slider) {
-            if (slider.id === "inpVolume") {
+        static handleTimelineChange() {
+            const pickedTime = UserInterface.inpTimeline.value;
+            AudioPlayer.audio.currentTime = pickedTime;
+            UserInterface.isTimelineSeeking = false;
+        }
+
+        static handleSliderChange(e) {
+            const slider = e.currentTarget;
+
+            if (slider.id === UserInterface.inpVolume.id) {
                 AudioPlayer.setVolume(document.querySelector("#inpVolume").value);
+            }
+
+            if (slider.id === UserInterface.inpTimeline.id) {
+                const elapsed = UserInterface.inpTimeline.value;
+                const timestamp = UserInterface._formatSecondsToTimestamp(elapsed);
+                UserInterface.timeElapsed.textContent = timestamp;
             }
         
             const percent = (parseInt(slider.value) / parseInt(slider.max)) * 100;
-            const parts = [
-                "var(--slider-filled-background-color) 0%",
-                `var(--slider-filled-background-color) ${percent}%`,
-                `rgba(255, 255, 255, 0.4) ${percent}%`,
-                "rgba(255, 255, 255, 0.4) 100%"
-            ];
-        
-            slider.setAttribute("style",  `background: linear-gradient(to right, ${parts.join(",")})`);
+            const style = `var(--slider-filled-background-color) ${percent}%,rgba(255, 255, 255, 0.4) ${percent}%`;
+            slider.setAttribute("style",  `background: linear-gradient(to right, ${style})`);
         }
     }
 };

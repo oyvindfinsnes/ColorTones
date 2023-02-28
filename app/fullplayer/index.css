@@ -256,13 +256,19 @@ body {
     --slider-filled-background-color: var(--active-color);
 }
 
-.playbar .controls .slider::-webkit-slider-thumb {
+.slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 0;
     height: 0;
     border-radius: 14px;
     background-color: #ffffff;
+}
+
+.timeline:hover #inpTimeline::-webkit-slider-thumb,
+.volume:hover #inpVolume::-webkit-slider-thumb {
+    width: 10px;
+    height: 10px;
 }
 
 .playbar .controls .button {
@@ -350,7 +356,9 @@ body {
 }
 
 .playbar .controls .action-center .player-timeline span {
+    width: 60px;
     font-size: 12px;
+    text-align: center;
     color: var(--secondary-text-color);
 }
 
@@ -358,7 +366,6 @@ body {
     display: flex;
     align-items: center;
     width: 100%;
-    margin: 0 10px;
 }
 
 .playbar .controls .extra-buttons {
@@ -371,7 +378,7 @@ body {
     align-items: center;
 }
 
-.playbar .controls .extra-buttons .volume-slider {
+.playbar .controls .extra-buttons .volume {
     display: flex;
     align-items: center;
     margin-left: 5px;
