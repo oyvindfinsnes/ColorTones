@@ -9,7 +9,7 @@ const disableBuiltinMediaKeys = () => {
 
 const initComponents = () => {
     AudioPlayer.init();
-    UserInterface.init();
+    UI.init();
 };
 
 const setup = () => {

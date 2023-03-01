@@ -168,15 +168,26 @@ body {
     z-index: 1;
 }
 
-.navbar .locations,
+.navbar .sources,
 .navbar .playlists {
     width: 100%;
     padding: 15px;
     box-sizing: border-box;
 }
 
-.navbar .locations img,
-.navbar .playlists img {
+.navbar .sources .sources-title,
+.navbar .playlists .playlists-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--primary-text-color);
+}
+
+.navbar .sources .sources-title img,
+.navbar .playlists .playlists-title img {
     cursor: pointer;
     width: 24px;
     height: auto;
@@ -184,19 +195,25 @@ body {
     transition: background 0.2s ease;
 }
 
-.navbar .locations img:hover,
-.navbar .playlists img:hover {
+.navbar .sources .sources-title img:hover,
+.navbar .playlists .playlists-title img:hover {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.navbar .locations .locations-title,
-.navbar .playlists .playlists-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 16px;
-    font-weight: bold;
-    color: var(--primary-text-color);
+.navbar .sources .source,
+.navbar .playlists .playlist {
+    cursor: pointer;
+    display: block;
+    width: calc(100% - 10px);
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 5px;
+    color: var(--secondary-text-color);
+}
+
+.navbar .sources .source:hover,
+.navbar .playlists .playlist:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Main Panel =============================================================== */

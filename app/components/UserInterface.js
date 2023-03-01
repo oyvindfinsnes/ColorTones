@@ -1,6 +1,9 @@
-class UserInterface {
+class UI {
     static init() {
         this.modal = document.querySelector(".modal");
+
+        this.btnAddSource = document.querySelector("#btnAddSource");
+
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
         this.inpTimeline = document.querySelector("#inpTimeline");
@@ -18,7 +21,7 @@ class UserInterface {
 
     static _setupListeners() {
         // Modal
-        window.addEventListener("modalAddSourceFinished", e => UserInterface.Modal.handleAddSourceFinished(e));
+        window.addEventListener("modalAddSourceFinished", e => UI.Modal.handleAddSourceFinished(e));
 
         // Topbar
         document.querySelector("#btnMinimize").addEventListener("click", () => window.electronAPI.minimizeWindow());
@@ -26,19 +29,19 @@ class UserInterface {
         document.querySelector("#btnClose").addEventListener("click", () => window.electronAPI.closeWindow());
 
         // Navbar
-        document.querySelector(".locations-title img").addEventListener("click", () => UserInterface.Modal.handleOpen("newSourceModal"));
+        UI.btnAddSource.querySelector("img").addEventListener("click", () => UI.Modal.handleOpen("newSourceModal"));
 
         // Playbar
-        AudioPlayer.audio.addEventListener("durationchange", () => UserInterface.Playbar.handleTrackDetailsChange());
-        AudioPlayer.audio.addEventListener("timeupdate", () => UserInterface.Playbar.handleTimelineUpdate());
+        AudioPlayer.audio.addEventListener("durationchange", () => UI.Playbar.handleTrackDetailsChange());
+        AudioPlayer.audio.addEventListener("timeupdate", () => UI.Playbar.handleTimelineUpdate());
 
-        UserInterface.btnSkipPrevious.addEventListener("click", () => UserInterface.Playbar.handleSkipPrevious());
-        UserInterface.btnPlay.addEventListener("click", () => UserInterface.Playbar.handlePlaystate());
-        UserInterface.btnSkipNext.addEventListener("click", () => UserInterface.Playbar.handleSkipNext());
+        UI.btnSkipPrevious.addEventListener("click", () => UI.Playbar.handleSkipPrevious());
+        UI.btnPlay.addEventListener("click", () => UI.Playbar.handlePlaystate());
+        UI.btnSkipNext.addEventListener("click", () => UI.Playbar.handleSkipNext());
 
-        UserInterface.inpTimeline.addEventListener("mousedown", () => UserInterface.isTimelineSeeking = true);
-        UserInterface.inpTimeline.addEventListener("change", () => UserInterface.Playbar.handleTimelineChange());
-        [...document.querySelectorAll(".slider")].forEach(slider => { slider.addEventListener("input", e => UserInterface.Playbar.handleSliderChange(e)) });
+        UI.inpTimeline.addEventListener("mousedown", () => UI.isTimelineSeeking = true);
+        UI.inpTimeline.addEventListener("change", () => UI.Playbar.handleTimelineChange());
+        [...document.querySelectorAll(".slider")].forEach(slider => { slider.addEventListener("input", e => UI.Playbar.handleSliderChange(e)) });
     }
 
     static _formatSecondsToTimestamp(seconds) {
@@ -61,7 +64,7 @@ class UserInterface {
             const templateContent = template.replace(regex, "");
             
             // Add the style and markup from template
-            UserInterface.modal.innerHTML = templateContent;
+            UI.modal.innerHTML = templateContent;
         
             // Dynamically add script to the body from template
             const tempSpan = document.createElement("SPAN");
@@ -71,12 +74,12 @@ class UserInterface {
             scriptElement.innerHTML = tempSpan.firstChild.textContent;
             document.body.appendChild(scriptElement);
         
-            UserInterface.modal.classList.add("active");
+            UI.modal.classList.add("active");
         }
 
         static async handleAddSourceFinished(e) {
-            UserInterface.modal.innerHTML = "";
-            UserInterface.modal.classList.remove("active");
+            UI.modal.innerHTML = "";
+            UI.modal.classList.remove("active");
             // Only the removable scripts will have an ID
             [...document.querySelectorAll("script")].forEach(script => {
                 if (script.id !== "") document.body.removeChild(script);
@@ -90,26 +93,36 @@ class UserInterface {
         }
     }
 
+    static Navbar = class {
+        static handleSourcesUpdated() {
+
+        }
+    }
+
     static Playbar = class {
         static handleTrackDetailsChange() {
             const { title, artist, duration } = AudioPlayer.getCurrentTrackDetails();
-            const elapsed = UserInterface._formatSecondsToTimestamp(0);
-            const total = UserInterface._formatSecondsToTimestamp(duration);
+            const elapsed = UI._formatSecondsToTimestamp(0);
+            const total = UI._formatSecondsToTimestamp(duration);
 
-            UserInterface.inpTimeline.max = duration;
+            UI.inpTimeline.max = duration;
 
-            UserInterface.trackTitle.textContent = title;
-            UserInterface.trackArtist.textContent = artist;
-            UserInterface.timeElapsed.textContent = elapsed;
-            UserInterface.timeTotal.textContent = total;
+            UI.trackTitle.textContent = title;
+            UI.trackArtist.textContent = artist;
+            UI.timeElapsed.textContent = elapsed;
+            UI.timeTotal.textContent = total;
         }
 
         static handleTimelineUpdate() {
-            if (!UserInterface.isTimelineSeeking) {
+            if (!UI.isTimelineSeeking) {
                 const elapsed = AudioPlayer.audio.currentTime;
                 
-                UserInterface.inpTimeline.value = elapsed;
-                UserInterface.inpTimeline.dispatchEvent(new Event("input"));
+                UI.inpTimeline.value = elapsed;
+                UI.inpTimeline.dispatchEvent(new Event("input"));
+            }
+
+            if (AudioPlayer.audio.currentTime === AudioPlayer.audio.duration) {
+                AudioPlayer.skipNext();
             }
         }
 
@@ -118,9 +131,11 @@ class UserInterface {
         }
 
         static handlePlaystate() {
-            const paused = AudioPlayer.audio.paused;
-        
-            AudioPlayer.togglePlaystate();
+            const isPaused = AudioPlayer.togglePlaystate();
+            
+            const btn = UI.btnPlay.firstElementChild;
+            const { playsrc, pausesrc } = btn.dataset;
+            btn.src = isPaused ? playsrc : pausesrc;
         }
 
         static handleSkipNext() {
@@ -128,22 +143,22 @@ class UserInterface {
         }
 
         static handleTimelineChange() {
-            const pickedTime = UserInterface.inpTimeline.value;
+            const pickedTime = UI.inpTimeline.value;
             AudioPlayer.audio.currentTime = pickedTime;
-            UserInterface.isTimelineSeeking = false;
+            UI.isTimelineSeeking = false;
         }
 
         static handleSliderChange(e) {
             const slider = e.currentTarget;
 
-            if (slider.id === UserInterface.inpVolume.id) {
+            if (slider.id === UI.inpVolume.id) {
                 AudioPlayer.setVolume(document.querySelector("#inpVolume").value);
             }
 
-            if (slider.id === UserInterface.inpTimeline.id) {
-                const elapsed = UserInterface.inpTimeline.value;
-                const timestamp = UserInterface._formatSecondsToTimestamp(elapsed);
-                UserInterface.timeElapsed.textContent = timestamp;
+            if (slider.id === UI.inpTimeline.id) {
+                const elapsed = UI.inpTimeline.value;
+                const timestamp = UI._formatSecondsToTimestamp(elapsed);
+                UI.timeElapsed.textContent = timestamp;
             }
         
             const percent = (parseInt(slider.value) / parseInt(slider.max)) * 100;

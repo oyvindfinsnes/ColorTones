@@ -137,22 +137,49 @@ class AudioPlayer {
         
         if (track) {
             this.audio.src = track;
-            this._handlePlaystateFading("+");
+            this.togglePlaystate({ forcePlay: true });
         }
     }
 
-    static togglePlaystate() {
-        if (this.isPlaystateFading) return false;
+    static togglePlaystate(opts = {}) {
+        const forcePlay = opts.hasOwnProperty("forcePlay") && opts.forcePlay;
+        const forcePause = opts.hasOwnProperty("forcePause") && opts.forcePause;
 
-        if (this.audio.paused) {
+        if (this.isPlaystateFading) return true;
+
+        if (this.playMode === this.PLAYMODE_STANDARD) {
+            if (this.standardQueue.length === 0) return true;
+        }
+
+        if (this.playMode === this.PLAYMODE_SHUFFLE) {
+            if (this.shuffleQueue.length === 0) return true;
+        }
+
+        const play = () => {
             if (this.audio.src !== "") {
                 this._handlePlaystateFading("+");
             } else {
-                this.skipNext();
+                const track = this._pickNextTrack();
+        
+                if (track) {
+                    this.audio.src = track;
+                    this._handlePlaystateFading("+");
+                }
             }
-        } else {
+
+            return false;
+        };
+
+        const pause = () => {
             this._handlePlaystateFading("-");
+            return true;
+        };
+
+        if (forcePlay || forcePause) {
+            return forcePlay ? play() : (forcePause ? pause() : null);
         }
+
+        return this.audio.paused ? play() : pause();
     }
 
     static skipNext() {
@@ -160,7 +187,7 @@ class AudioPlayer {
         
         if (track) {
             this.audio.src = track;
-            this._handlePlaystateFading("+");
+            this.togglePlaystate({ forcePlay: true });
         }
 
         if (this.standardQueue.length <= 5 || this.shuffleQueue.length <= 5) {
