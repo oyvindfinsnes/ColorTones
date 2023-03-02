@@ -3,6 +3,9 @@ class UI {
         this.modal = document.querySelector(".modal");
 
         this.btnAddSource = document.querySelector("#btnAddSource");
+        this.sourcesItems = document.querySelector(".sources-items");
+        this.btnAddPlaylist = document.querySelector("#btnAddPlaylist");
+        this.playlistsItems = document.querySelector(".playlists-items");
 
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
@@ -90,6 +93,15 @@ class UI {
             const sources = await window.electronAPI.finalizeSourceFiles(checkedRadioID, isReversed, targetDir);
             AudioPlayer.updateAudioSources(sources);
             AudioPlayer.updateCurrentSource(targetDir);
+            UI.Modal.handleDisplaySources();
+        }
+
+        static handleDisplaySources() {
+            const sources = AudioPlayer.audioSources;
+
+            for (const source in sources) {
+                const path = sources[source].basePath + "/" + source;
+            }
         }
     }
 
