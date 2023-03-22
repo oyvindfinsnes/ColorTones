@@ -237,9 +237,9 @@
 
         document.querySelector(".infinite-loader").classList.remove("inactive");
 
-        const { targetDir, pickedExample } = await window.electronAPI.folderSelectSource();
+        const { sources, sourcePath, pickedExample } = await window.electronAPI.folderSelectSource();
 
-        if (targetDir !== null) {
+        if (sourcePath !== null) {
             document.querySelector(".infinite-loader").classList.add("inactive");
 
             if (pickedExample !== null) {
@@ -250,7 +250,8 @@
                 document.querySelector(".location-submit").classList.remove("disabled");
             }
 
-            document.querySelector(".container").dataset.targetDir = targetDir;
+            document.querySelector(".container").dataset.sources = sources;
+            document.querySelector(".container").dataset.sourcePath = sourcePath;
         } else {
             document.querySelector(".infinite-loader").classList.add("inactive");
         }
@@ -272,7 +273,7 @@
         const example = document.querySelector(".example-filename");
                     
         if (document.querySelector("#inpReverseOrder").checked) {
-            example.textContent = example.dataset.content.split("-").reverse().join(" - ");
+            example.textContent = example.dataset.content.split(" - ").reverse().join(" - ");
         } else {
             example.textContent = example.dataset.content;
         }
@@ -288,14 +289,13 @@
         });
 
         
-        if (document.querySelector(".container").dataset.hasOwnProperty("targetDir")) {
-            const details = {
-                detail: {
+        if (document.querySelector(".container").dataset.hasOwnProperty("sourcePath")) {
+            const details = { detail: {
                     checkedRadioID,
                     isReversed,
-                    targetDir: document.querySelector(".container").dataset.targetDir
-                }
-            };
+                    sources: document.querySelector(".container").dataset.sources,
+                    sourcePath: document.querySelector(".container").dataset.sourcePath
+                } };
 
             window.dispatchEvent(new window.CustomEvent("modalAddSourceFinished", details));
         }

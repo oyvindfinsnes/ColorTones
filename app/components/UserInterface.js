@@ -88,21 +88,20 @@ class UI {
                 if (script.id !== "") document.body.removeChild(script);
             });
             
-            const { checkedRadioID, isReversed, targetDir } = e.detail;
-        
-            const sources = await window.electronAPI.finalizeSourceFiles(checkedRadioID, isReversed, targetDir);
-            AudioPlayer.updateAudioSources(sources);
-            AudioPlayer.updateCurrentSource(targetDir);
-            UI.Modal.handleDisplaySources();
+            const args = [e.detail.checkedRadioID, e.detail.isReversed, e.detail.sources, e.detail.sourcePath];
+            const sources = await window.electronAPI.finalizeSourceFiles(...args);
+            //AudioPlayer.updateAudioSources(e.detail.sources);
+            //AudioPlayer.updateCurrentSource(targetDir);
+            //UI.Modal.handleDisplaySources();
         }
 
-        static handleDisplaySources() {
+        /* static handleDisplaySources() {
             const sources = AudioPlayer.audioSources;
 
             for (const source in sources) {
                 const path = sources[source].basePath + "/" + source;
             }
-        }
+        } */
     }
 
     static Navbar = class {
