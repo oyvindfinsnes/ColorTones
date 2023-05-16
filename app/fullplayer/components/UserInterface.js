@@ -1,5 +1,12 @@
 class UI {
     static init() {
+        this.COLORS = {
+            bg: "#420e4e",
+            accent1: "#9c1b37",
+            accent2: "#d72227",
+            highlight: "#fd751f"
+        };
+
         this.modal = document.querySelector(".modal");
 
         this.btnAddSource = document.querySelector("#btnAddSource");
@@ -20,6 +27,8 @@ class UI {
         this.isTimelineSeeking = false;
 
         this._setupListeners();
+        /* this.activateEffects();
+        window.electronAPI.setAppBackground(UI.COLORS.bg); */
     }
 
     static _setupListeners() {
@@ -56,6 +65,15 @@ class UI {
         return h
             ? `${h}:${m >= 10 ? m : "0" + m}:${s >= 10 ? s : "0" + s}`
             : `${m}:${s >= 10 ? s : "0" + s}`;
+    }
+
+    static activateEffects() {
+        const colors = [UI.COLORS.accent1, UI.COLORS.accent2, UI.COLORS.highlight];
+        Utilities.InterfaceEffects.applyBackgroundAnimation(...colors);
+    }
+
+    static deactivateEffects() {
+        Utilities.InterfaceEffects.removeBackgroundAnimation();
     }
 
     static Modal = class {

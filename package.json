@@ -12,9 +12,12 @@
   ],
   "author": "Zamt3x",
   "license": "MIT",
-  "devDependencies": {
-    "electron": "^23.0.0",
+  "dependencies": {
     "music-metadata": "^7.13.0",
     "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "electron": "^24.3.0",
+    "electron-builder": "^24.4.0"
   }
 }

@@ -15,7 +15,6 @@ const initComponents = () => {
 const setup = () => {
     initComponents();
     disableBuiltinMediaKeys();
-    Utilities.applyBackgroundAnimation();
 };
 
 window.addEventListener("DOMContentLoaded", () => setup());

@@ -59,7 +59,6 @@ body {
     overflow: hidden;
     color: var(--primary-text-color);
     font-family: "Poppins";
-    background-color: #80232c;
 }
 
 .modal, .topbar, .navbar, .main-panel, .playbar {
@@ -127,7 +126,7 @@ body {
     height: 100%;
     opacity: 0.8;
     padding: 0 15px;
-    transition: background 0.15s ease;
+    transition: background 0.1s linear;
 }
 
 .topbar .buttons .button:hover {
@@ -196,7 +195,6 @@ body {
     width: 24px;
     height: auto;
     border-radius: 5px;
-    transition: background 0.2s ease;
 }
 
 .navbar .sources .sources-title img:hover,
@@ -267,12 +265,12 @@ body {
     height: 80px;
     overflow: hidden;
     border-radius: 10px;
-    background-color: rgba(100, 20, 20, 0.5);
     z-index: 10;
 }
 
 .playbar .bgimg img {
-    animation: infiniteScroll 110s linear infinite;
+    filter: var(--active-color-from-filter);
+    animation: infiniteScroll 110s ease infinite;
 }
 
 .playbar .controls {
@@ -324,7 +322,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.1s linear, transform 0.1s linear;
 }
 
 .playbar .controls .button:not(.active) {
