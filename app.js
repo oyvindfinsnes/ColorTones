@@ -1,23 +1,30 @@
-const { app, Menu, Tray, ipcMain, dialog, BrowserWindow, globalShortcut } = require("electron");
-const { ModalTemplate, ModalAddSource, ModalAddPlaylist } = require("./app/fullplayer/templates/templatehandlers");
-const { Database } = require("./app/core/lib/database");
-const { parseFile } = require("music-metadata");
+const { app, Menu, Tray, BrowserWindow, globalShortcut } = require("electron");
 const sqlite3 = require("sqlite3");
 const path = require("path");
 const got = require("got");
 const fs = require("fs");
 
-const getDBPath = () => {
+const getResourcesPath = () => {
     const appPath = app.getAppPath();
     const basePath = app.isPackaged
         ? appPath.replace("app.asar", "")
         : appPath;
+    const returnPath = path.join(basePath, "data");
 
-    return path.resolve(basePath, "appdata.sqlite");
+    if (!fs.existsSync(returnPath)) fs.mkdirSync(returnPath);
+    
+    return returnPath;
 };
 
 let mainWindow = null;
-const dbPath = getDBPath();
+const resourcesPath = getResourcesPath();
+const dbPath = path.join(resourcesPath, "appdata.sqlite");
+
+global.sharedState = { mainWindow, resourcesPath, dbPath };
+
+const { Database } = require("./app/core/lib/database");
+const { registerAppHandlers } = require("./handlers/apphandlers");
+const { registerRendererHandlers } = require("./handlers/rendererhandlers");
 
 const createMainWindow = () => {
     const iconPath = path.join(__dirname, "app", "assets", "icon", "app", "256x256.png");
@@ -49,11 +56,11 @@ const createMainWindow = () => {
 
 const tempfn = async () => {
     console.log("getting data");
-    const musicData = await ModalAddSource.getMusicDataFromSourcePath("C:/Users/Oyvin/Desktop/Music", fs.promises.readdir, path, parseFile);
+    const musicData = await ModalAddSource.getMusicDataFromSourcePath("C:/Users/Oyvin/Desktop/Music");
     const sources = JSON.parse(musicData.sources);
 
     for (let i = 0; i < sources.length; i++) {
-        const [artist, title] = path.parse(sources[i].fileName).name.split(" - ");
+        const { artist, title } = sources[i];
         const albumInfo = await Database.getExternalAlbumData(got.get, path.join, artist.trim(), title.trim());
 
         delete sources[i]["unfinished"];
@@ -74,24 +81,13 @@ const tempfn = async () => {
         sources[i].img = albumInfo["album"]["image"][1]["#text"];
     }
 
-    fs.writeFileSync("tempdata.json", JSON.stringify(sources, null, 4));
+    const writePath = path.join(resourcesPath, "tempdata.json");
+    fs.writeFileSync(writePath, JSON.stringify(sources, null, 4));
     console.log("done getting");
 };
 
-const setup = () => {
-    createMainWindow();
-
-    // Argument funnels for handlers
-    ipcMain.on("minimizeWindow", () => mainWindow.minimize());
-    ipcMain.on("maximizeWindow", () => mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize());
-    ipcMain.on("closeWindow", () => mainWindow.hide());
-    ipcMain.on("setAppBackground", (e, color) => mainWindow.setBackgroundColor(color));
-    ipcMain.handle("requestTemplate", async (e, name) => await ModalTemplate.request(name, path.join, fs.promises.readFile));
-    ipcMain.handle("folderSelectSource", async () => await ModalAddSource.handleSelect(dialog, mainWindow, fs.promises.readdir, path, parseFile));
-    ipcMain.handle("finalizeSourceFiles", async (e, checkedRadioID, isReversed, sources, sourcePath) => ModalAddSource.finalizeMusicDataFromSourcePath(checkedRadioID, isReversed, sources, sourcePath));
-
-    //tempfn();
-    /* const sources = JSON.parse(fs.readFileSync("tracks.json"));
+const tempfn2 = async () => {
+    const sources = JSON.parse(fs.readFileSync(path.join(resourcesPath, "tempdata.json")));
     
     const artistNames = new Set();
     const albumDataByArtist = {};
@@ -117,13 +113,21 @@ const setup = () => {
         trackData.push({ filename: fileName, name: title, albumname: albumName, artistname: artist, sourcepath: "C:/Users/Oyvin/Desktop/Music" });
     }
 
-    await database.init(new sqlite3.Database(dbPath));
+    await Database.init(new sqlite3.Database(dbPath));
 
-    database.addSource("C:/Users/Oyvin/Desktop/Music", "Music");
+    Database.addSource("C:/Users/Oyvin/Desktop/Music", "Music");
 
-    database.addArtists(artistNames);
-    database.addAlbums(albumDataByArtist);
-    database.addTracks(trackData); */
+    Database.addArtists(artistNames);
+    Database.addAlbums(albumDataByArtist);
+    Database.addTracks(trackData);
+}
+
+const setup = () => {
+    createMainWindow();
+    registerAppHandlers();
+    registerRendererHandlers();
+    //tempfn();
+    //tempfn2();
 };
 
 Menu.setApplicationMenu(null);

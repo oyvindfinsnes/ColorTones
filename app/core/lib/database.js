@@ -51,8 +51,8 @@ class Database {
     ];
 
     static _bulkInsert = (template, valueList) => {
-        db.serialize(() => {
-            const insertStatement = db.prepare(template);
+        Database.db.serialize(() => {
+            const insertStatement = Database.db.prepare(template);
 
             for (const values of valueList) {
                 if (Array.isArray(values)) {
@@ -74,7 +74,7 @@ class Database {
         Database.run([
             "PRAGMA journal_mode = OFF;",
             "PRAGMA foreign_keys = ON;",
-            ...tableCreationQueries
+            ...Database.tableCreationQueries
         ]);
     }
 

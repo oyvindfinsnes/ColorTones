@@ -1,32 +1,37 @@
+const { dialog } = require("electron");
+const { parseFile } = require("music-metadata");
+const path = require("path");
+const fs = require("fs");
+
 class ModalTemplate {
-    static request = async (name, pathjoin, fsreadfile) => {
-        const template = pathjoin(__dirname, "../", "templates", name + ".html");
-        return await fsreadfile(template, "utf8");
+    static request = async name => {
+        const template = path.join(__dirname, name + ".html");
+        return await fs.promises.readFile(template, "utf8");
     }
 }
 
 class ModalAddSource {
-    static handleSelect = async (dialog, win, fsreaddir, pathmodule, parseFile) => {
-        const { canceled, filePaths } = await dialog.showOpenDialog(win, { properties: ["openDirectory"] });
+    static handleSelect = async () => {
+        const args = [global.sharedState.mainWindow, { properties: ["openDirectory"] }];
+        const { canceled, filePaths } = await dialog.showOpenDialog(...args);
     
         if (canceled) {
             return { sources: null, sourcePath: null, pickedExample: null };
         }
         
-        const args = [filePaths[0], fsreaddir, pathmodule, parseFile];
-        return await ModalAddSource.getMusicDataFromSourcePath(...args);
+        return await ModalAddSource.getMusicDataFromSourcePath(filePaths[0]);
     }
 
-    static getMusicDataFromSourcePath = async (sourcePath, fsreaddir, pathmodule, parseFile) => {
+    static getMusicDataFromSourcePath = async (sourcePath) => {
         const sources = [];
         const supported = [".wav", ".mp3", ".ogg", ".flac"];
-        const audioFiles = await fsreaddir(sourcePath);
+        const audioFiles = await fs.promises.readdir(sourcePath);
     
         for (const audioFile of audioFiles) {
-            if (!supported.includes(pathmodule.extname(audioFile))) continue;
+            if (!supported.includes(path.extname(audioFile))) continue;
     
             try {
-                const metadata = await parseFile(pathmodule.join(sourcePath, audioFile));
+                const metadata = await parseFile(path.join(sourcePath, audioFile));
                 const { artist, title } = metadata.common;
                 const obj = { fileName: audioFile };
     
@@ -39,13 +44,6 @@ class ModalAddSource {
                 } else {
                     obj["unfinished"] = true;
                 }
-                
-                /* else {
-                    const { name } = path.parse(audioFile);
-                    const [artist, title] = name.split(" - ");
-                    obj["artist"] = artist;
-                    obj["title"] = title;
-                } */
     
                 sources.push(obj);
             } catch {
@@ -56,7 +54,7 @@ class ModalAddSource {
         let pickedExample = null;
         sources.find(o => {
             if (o.hasOwnProperty("unfinished")) {
-                pickedExample = pathmodule.parse(o.fileName).name;
+                pickedExample = path.parse(o.fileName).name;
                 return true;
             }
         });
@@ -65,7 +63,13 @@ class ModalAddSource {
     }
 
     static finalizeMusicDataFromSourcePath = async (checkedRadioID, isReversed, sources, sourcePath) => {
-        console.log(checkedRadioID, isReversed, sourcePath);
+
+        /* else {
+            const { name } = path.parse(audioFile);
+            const [artist, title] = name.split(" - ");
+            obj["artist"] = artist;
+            obj["title"] = title;
+        } */
 
         /* Object.keys(sources[targetDir].tracks).forEach(trackID => {
             const target = sources[targetDir].tracks[trackID];
