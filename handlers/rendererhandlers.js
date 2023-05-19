@@ -93,6 +93,8 @@ class Modal {
             const albumData = {};
             const trackData = [];
 
+            // Creating 3 different data structures to complete DB insert (with
+            // data dependencies)
             for (const source of sources) {
                 const { fileName, artist, title, albumName, img } = source;
                 

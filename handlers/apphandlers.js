@@ -1,4 +1,4 @@
-const { ipcMain } = require("electron");
+const { app, ipcMain } = require("electron");
 
 const registerAppHandlers = () => {
     ipcMain.on("minimizeWindow", () => {
@@ -11,6 +11,9 @@ const registerAppHandlers = () => {
     });
     ipcMain.on("closeWindow", () => {
         global.sharedState.mainWindow.hide();
+    });
+    ipcMain.on("quitApp", () => {
+        app.quit();
     });
     ipcMain.on("setAppBackground", (e, color) => {
         global.sharedState.mainWindow.setBackgroundColor(color);

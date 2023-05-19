@@ -9,6 +9,14 @@ class UI {
 
         this.modal = document.querySelector(".modal");
 
+        this.profile = document.querySelector("#profile");
+        this.profileDropdown = document.querySelector("#profileDropdown");
+        this.profileDropdownOptions = [
+            document.querySelector("#dropdownProfile"),
+            document.querySelector("#dropdownSettings"),
+            document.querySelector("#dropdownQuit")
+        ];
+
         this.btnAddSource = document.querySelector("#btnAddSource");
         this.sourcesItems = document.querySelector(".sources-items");
         this.btnAddPlaylist = document.querySelector("#btnAddPlaylist");
@@ -36,6 +44,10 @@ class UI {
         window.addEventListener("modalAddSourceFinished", e => UI.Modal.handleAddSourceFinished(e));
 
         // Topbar
+        window.addEventListener("click", e => UI.Topbar.handleProfileDropdown(e));
+        UI.profileDropdownOptions.forEach(option => {
+            option.addEventListener("click", () => UI.Topbar.handleDropdownOption(option));
+        });
         document.querySelector("#btnMinimize").addEventListener("click", () => window.electronAPI.minimizeWindow());
         document.querySelector("#btnMaximize").addEventListener("click", () => window.electronAPI.maximizeWindow());
         document.querySelector("#btnClose").addEventListener("click", () => window.electronAPI.closeWindow());
@@ -123,6 +135,20 @@ class UI {
         } */
     }
 
+    static Topbar = class {
+        static handleProfileDropdown(e) {
+            if (e.target == UI.profile || e.target.parentElement == UI.profile) {
+                UI.profileDropdown.classList.add("show");
+            } else {
+                UI.profileDropdown.classList.remove("show");
+            }
+        }
+
+        static handleDropdownOption(option) {
+            if (option.id == "dropdownQuit") window.electronAPI.quitApp();
+        }
+    }
+
     static Navbar = class {
         static handleSourcesUpdated() {
             //
@@ -151,7 +177,7 @@ class UI {
                 UI.inpTimeline.dispatchEvent(new Event("input"));
             }
 
-            if (AudioPlayer.audio.currentTime === AudioPlayer.audio.duration) {
+            if (AudioPlayer.audio.currentTime == AudioPlayer.audio.duration) {
                 AudioPlayer.skipNext();
             }
         }
@@ -181,11 +207,11 @@ class UI {
         static handleSliderChange(e) {
             const slider = e.currentTarget;
 
-            if (slider.id === UI.inpVolume.id) {
+            if (slider.id == UI.inpVolume.id) {
                 AudioPlayer.setVolume(document.querySelector("#inpVolume").value);
             }
 
-            if (slider.id === UI.inpTimeline.id) {
+            if (slider.id == UI.inpTimeline.id) {
                 const elapsed = UI.inpTimeline.value;
                 const timestamp = UI._formatSecondsToTimestamp(elapsed);
                 UI.timeElapsed.textContent = timestamp;
