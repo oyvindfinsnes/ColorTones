@@ -1,6 +1,4 @@
 /node_modules
 
-# App data(base) file
-appdata.sqlite
-
-tempdata.json
+# App data files
+/data

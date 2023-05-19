@@ -270,7 +270,7 @@ body {
 
 .playbar .bgimg img {
     filter: var(--active-color-from-filter);
-    animation: infiniteScroll 110s ease infinite;
+    animation: infiniteScroll 120s linear infinite;
 }
 
 .playbar .controls {

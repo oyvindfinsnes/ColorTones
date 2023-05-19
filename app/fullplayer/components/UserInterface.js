@@ -107,9 +107,10 @@ class UI {
             });
             
             const args = [e.detail.checkedRadioID, e.detail.isReversed, e.detail.sources, e.detail.sourcePath];
-            const sources = await window.electronAPI.finalizeSourceFiles(...args);
-            //AudioPlayer.updateAudioSources(e.detail.sources);
-            //AudioPlayer.updateCurrentSource(targetDir);
+            const { sources, sourceDir } = await window.electronAPI.finalizeSourceFiles(...args);
+            
+            //AudioPlayer.updateAudioSources(sources);
+            //AudioPlayer.updateCurrentSource(sourceDir);
             //UI.Modal.handleDisplaySources();
         }
 
@@ -124,7 +125,7 @@ class UI {
 
     static Navbar = class {
         static handleSourcesUpdated() {
-
+            //
         }
     }
 
