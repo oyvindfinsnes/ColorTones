@@ -37,13 +37,17 @@
 }
 
 :root {
-    --active-color: #585858;
-    --scrollbar-thumb-color: #ffffff60;
-    --active-color-from-filter: contrast(100%);
-    --button-background-color: #d72227;
+    --bg-color: #000000;
+    --accent1-color: #000000;
+    --accent2-color: #000000;
+    --highlight-color: #000000;
+    --highlight-color-from-filter: contrast(100%);
+
     --primary-text-color: #ffffff;
     --secondary-text-color: #cccccc;
     --tertiary-text-color: #dddddd;
+    --scrollbar-thumb-color: #ffffff60;
+    --modal-background: radial-gradient(#202020, #151515);
     
     --bg-opacity: 0.3;
     --topbar-height: 40px;
@@ -64,8 +68,6 @@ img {
 body {
     display: grid;
     grid-template-columns: var(--navbar-width) 1fr;
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
     color: var(--primary-text-color);
     font-family: "Poppins";
@@ -308,7 +310,7 @@ body {
 
 .navbar .sources .sources-items::-webkit-scrollbar-thumb:hover,
 .navbar .playlists .playlists-items::-webkit-scrollbar-thumb:hover {
-    background-color: var(--active-color);
+    background-color: var(--highlight-color);
 }
 
 .navbar .sources .sources-items .source,
@@ -385,7 +387,7 @@ body {
 }
 
 .main-panel .panels .panel .panel-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--active-color);
+    background-color: var(--highlight-color);
 }
 
 .main-panel .panels .panel .panel-content .panel-item {
@@ -430,7 +432,7 @@ body {
 }
 
 .playbar .bgimg img {
-    filter: var(--active-color-from-filter);
+    filter: var(--highlight-color-from-filter);
     animation: infiniteScroll 120s linear infinite;
 }
 
@@ -460,7 +462,7 @@ body {
 }
 
 .playbar .controls .slider:hover {
-    --slider-filled-background-color: var(--active-color);
+    --slider-filled-background-color: var(--highlight-color);
 }
 
 .slider::-webkit-slider-thumb {
@@ -469,7 +471,7 @@ body {
     width: 0;
     height: 0;
     border-radius: 14px;
-    background-color: #ffffff;
+    background-color: var(--primary-text-color);
 }
 
 .timeline:hover #inpTimeline::-webkit-slider-thumb,
@@ -501,7 +503,7 @@ body {
 }
 
 .playbar .controls .button.active img {
-    filter: var(--active-color-from-filter);
+    filter: var(--highlight-color-from-filter);
 }
 
 .playbar .controls .details {

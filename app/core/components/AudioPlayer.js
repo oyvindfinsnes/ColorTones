@@ -14,9 +14,20 @@ class AudioPlayer {
         this.playMode = this.PLAYMODE_STANDARD;
         
         this.isPlaystateFading = false;
+
+        AudioPlayer._setupListeners();
     }
 
     // Private members =========================================================
+
+    static _setupListeners() {
+        AudioPlayer.audio.addEventListener("durationchange", () => {
+            UI.Playbar.handleTrackDetailsChange();
+        });
+        AudioPlayer.audio.addEventListener("timeupdate", () => {
+            UI.Playbar.handleTimelineUpdate();
+        });
+    }
 
     static _beforeExit() {
         // save current track

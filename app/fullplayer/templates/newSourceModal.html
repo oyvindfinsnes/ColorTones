@@ -12,7 +12,7 @@
         border-radius: 20px;
         box-sizing: border-box;
         box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
-        background: radial-gradient(#202020, #151515);
+        background: var(--modal-background);
     }
 
     .modal .container .modal-close {
@@ -32,7 +32,7 @@
 
     .modal .container .content {
         display: grid;
-        grid-template-rows: 1fr 1fr 1fr 2fr 3fr 1fr;
+        grid-template-rows: 1fr 1fr 2fr 3fr 1fr;
         align-items: center;
         width: 100%;
         height: 100%;
@@ -47,29 +47,6 @@
     .modal .container .content .location-subtitle {
         display: block;
         margin-bottom: 15px;
-    }
-
-    .modal .container .content .add-location,
-    .modal .container .content .location-submit {
-        cursor: pointer;
-        outline: none;
-        border: none;
-        width: 50%;
-        opacity: 1;
-        font-size: 14px;
-        padding: 15px 0;
-        font-weight: bold;
-        border-radius: 5px;
-        justify-self: center;
-        text-transform: uppercase;
-        transition: opacity 1s ease;
-        color: var(--primary-text-color);
-        background-color: var(--button-background-color);
-    }
-
-    .modal .container .content .location-submit.disabled {
-        pointer-events: none;
-        opacity: 0.5;
     }
 
     .modal .container .content .infinite-loader {
@@ -88,7 +65,14 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        background: linear-gradient(to right, #9c1b37, #b82e37, #d24433, #e95b2c, #fd751f, #e95b2c, #d24433, #b82e37, #9c1b37);
+        background: linear-gradient(
+            to right,
+            var(--accent1-color),
+            var(--accent2-color),
+            var(--highlight-color),
+            var(--accent2-color),
+            var(--accent1-color)
+        );
         background-size: 200% 100%;
         animation: infiniteLoading 3s linear infinite;
     }
@@ -108,7 +92,7 @@
 
     .modal .container .content .file-data .highlighted,
     .modal .container .content .reverse-order .highlighted {
-        color: var(--active-color);
+        color: var(--highlight-color);
     }
 
     .modal .container .content .file-data > div,
@@ -129,7 +113,7 @@
         height: 16px;
         margin-right: 5px;
         border-radius: 50%;
-        border: 1px solid var(--button-background-color);
+        border: 1px solid var(--highlight-color);
     }
 
     input[type="radio"]::before {
@@ -139,7 +123,7 @@
         border-radius: 50%;
         transform: scale(0);
         transition: transform 0.2s ease;
-        background-color: var(--button-background-color);
+        background-color: var(--highlight-color);
     }
 
     input[type="radio"]:checked::before {
@@ -158,11 +142,11 @@
         height: 16px;
         margin-right: 5px;
         transition: background 0.2s ease;
-        border: 1px solid var(--button-background-color);
+        border: 1px solid var(--highlight-color);
     }
 
     input[type="checkbox"]:checked {
-        background-color: var(--button-background-color);
+        background-color: var(--highlight-color);
     }
 
     input[type="checkbox"] + label {
@@ -176,6 +160,35 @@
         color: #aaaaaa;
         text-align: center;
     }
+
+    .modal .container .content .buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .modal .container .content .buttons .add-location,
+    .modal .container .content .buttons .location-submit {
+        cursor: pointer;
+        outline: none;
+        border: none;
+        width: 40%;
+        opacity: 1;
+        font-size: 14px;
+        padding: 15px 0;
+        font-weight: bold;
+        border-radius: 5px;
+        justify-self: center;
+        text-transform: uppercase;
+        transition: opacity 1s ease;
+        color: var(--primary-text-color);
+        background-color: var(--highlight-color);
+    }
+
+    .modal .container .content .location-submit.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
 </style>
 
 <div class="container">
@@ -183,8 +196,6 @@
 
     <div class="content">
         <span class="location-title">Add a new source to your library</span>
-
-        <input class="add-location" type="button" value="pick folder" />
         
         <div class="infinite-loader inactive"></div>
 
@@ -213,7 +224,10 @@
             <span class="example-filename" data-content=""></span>
         </div>
 
-        <input class="location-submit disabled" type="button" value="Finish" />
+        <div class="buttons">
+            <input class="add-location" type="button" value="pick folder" />
+            <input class="location-submit disabled" type="button" value="finish" />
+        </div>
     </div>
 </div>
 

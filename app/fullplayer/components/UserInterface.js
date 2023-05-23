@@ -1,11 +1,5 @@
 class UI {
     static init() {
-        /* this.COLORS = {
-            bg: "#420e4e",
-            accent1: "#9c1b37",
-            accent2: "#d72227",
-            highlight: "#fd751f"
-        }; */
         this.COLORS = {
             bg: "#121212",
             accent1: "#B3005E",
@@ -22,6 +16,9 @@ class UI {
             document.querySelector("#dropdownSettings"),
             document.querySelector("#dropdownQuit")
         ];
+        this.btnMinimize = document.querySelector("#btnMinimize");
+        this.btnMaximize = document.querySelector("#btnMaximize");
+        this.btnClose = document.querySelector("#btnClose");
 
         this.btnAddSource = document.querySelector("#btnAddSource");
         this.sourcesItems = document.querySelector(".sources-items");
@@ -49,31 +46,61 @@ class UI {
 
     static _setupListeners() {
         // Modal
-        window.addEventListener("modalAddSourceFinished", e => UI.Modal.handleAddSourceFinished(e));
+        window.addEventListener("modalAddSourceFinished", e => {
+            UI.Modal.handleAddSourceFinished(e);
+        });
 
         // Topbar
-        window.addEventListener("click", e => UI.Topbar.handleProfileDropdown(e));
-        UI.profileDropdownOptions.forEach(option => {
-            option.addEventListener("click", () => UI.Topbar.handleDropdownOption(option));
+        UI.profile.addEventListener("click", () => {
+            UI.Topbar.handleProfileDropdownOpen();
         });
-        document.querySelector("#btnMinimize").addEventListener("click", () => window.electronAPI.minimizeWindow());
-        document.querySelector("#btnMaximize").addEventListener("click", () => window.electronAPI.maximizeWindow());
-        document.querySelector("#btnClose").addEventListener("click", () => window.electronAPI.closeWindow());
+        UI.profile.addEventListener("mouseleave", () => {
+            UI.Topbar.handleProfileDropdownClose();
+        });
+        UI.profileDropdownOptions.forEach(option => {
+            option.addEventListener("click", () => {
+                UI.Topbar.handleDropdownOption(option);
+            });
+        });
+        btnMinimize.addEventListener("click", () => {
+            window.electronAPI.minimizeWindow();
+        });
+        btnMaximize.addEventListener("click", () => {
+            window.electronAPI.maximizeWindow();
+        });
+        btnClose.addEventListener("click", () => {
+            window.electronAPI.closeWindow();
+        });
 
         // Navbar
-        UI.btnAddSource.querySelector("img").addEventListener("click", () => UI.Modal.handleOpen("newSourceModal"));
+        UI.btnAddSource.querySelector("img").addEventListener("click", () => {
+            UI.Modal.handleOpen("newSourceModal");
+        });
+        UI.btnAddPlaylist.querySelector("img").addEventListener("click", () => {
+            UI.Modal.handleOpen("newPlaylistModal");
+        });
 
         // Playbar
-        AudioPlayer.audio.addEventListener("durationchange", () => UI.Playbar.handleTrackDetailsChange());
-        AudioPlayer.audio.addEventListener("timeupdate", () => UI.Playbar.handleTimelineUpdate());
-
-        UI.btnSkipPrevious.addEventListener("click", () => UI.Playbar.handleSkipPrevious());
-        UI.btnPlay.addEventListener("click", () => UI.Playbar.handlePlaystate());
-        UI.btnSkipNext.addEventListener("click", () => UI.Playbar.handleSkipNext());
-
-        UI.inpTimeline.addEventListener("mousedown", () => UI.isTimelineSeeking = true);
-        UI.inpTimeline.addEventListener("change", () => UI.Playbar.handleTimelineChange());
-        [...document.querySelectorAll(".slider")].forEach(slider => { slider.addEventListener("input", e => UI.Playbar.handleSliderChange(e)) });
+        UI.btnSkipPrevious.addEventListener("click", () => {
+            UI.Playbar.handleSkipPrevious();
+        });
+        UI.btnPlay.addEventListener("click", () => {
+            UI.Playbar.handlePlaystate();
+        });
+        UI.btnSkipNext.addEventListener("click", () => {
+            UI.Playbar.handleSkipNext();
+        });
+        UI.inpTimeline.addEventListener("mousedown", () => {
+            UI.isTimelineSeeking = true;
+        });
+        UI.inpTimeline.addEventListener("change", () => {
+            UI.Playbar.handleTimelineChange();
+        });
+        [...document.querySelectorAll(".slider")].forEach(slider => {
+            slider.addEventListener("input", e => {
+                UI.Playbar.handleSliderChange(e);
+            });
+        });
     }
 
     static _formatSecondsToTimestamp(seconds) {
@@ -89,12 +116,16 @@ class UI {
 
     static setAppColors() {
         const root = document.documentElement;
-        const activeColorFilter = Utilities.CSSFilterGenerator.compute(UI.COLORS.highlight);
+        const { bg, accent1, accent2, highlight } = UI.COLORS;
+        const highlightColorFilter = Utilities.CSSFilterGenerator.compute(highlight);
         
-        window.electronAPI.setAppBackground(UI.COLORS.bg);
-        root.style.setProperty("--active-color", UI.COLORS.highlight);
-        root.style.setProperty("--scrollbar-thumb-color", `${UI.COLORS.highlight}60`);
-        root.style.setProperty("--active-color-from-filter", activeColorFilter);
+        window.electronAPI.setAppBackground(bg);
+        root.style.setProperty("--bg-color", bg);
+        root.style.setProperty("--accent1-color", accent1);
+        root.style.setProperty("--accent2-color", accent2);
+        root.style.setProperty("--highlight-color", highlight);
+        root.style.setProperty("--scrollbar-thumb-color", `${highlight}60`);
+        root.style.setProperty("--highlight-color-from-filter", highlightColorFilter);
     }
 
     static Modal = class {
@@ -136,12 +167,12 @@ class UI {
     }
 
     static Topbar = class {
-        static handleProfileDropdown(e) {
-            if (e.target == UI.profile || e.target.parentElement == UI.profile) {
-                UI.profileDropdown.classList.add("show");
-            } else {
-                UI.profileDropdown.classList.remove("show");
-            }
+        static handleProfileDropdownOpen() {
+            UI.profileDropdown.classList.add("show");
+        }
+
+        static handleProfileDropdownClose() {
+            UI.profileDropdown.classList.remove("show");
         }
 
         static handleDropdownOption(option) {
@@ -151,7 +182,8 @@ class UI {
 
     static Background = class {
         static activateEffects() {
-            Utilities.InterfaceEffects.applyBackgroundAnimation(UI.COLORS.accent1, UI.COLORS.accent2);
+            const args = [UI.COLORS.accent1, UI.COLORS.accent2];
+            Utilities.InterfaceEffects.applyBackgroundAnimation(...args);
         }
     
         static deactivateEffects() {
@@ -192,7 +224,7 @@ class UI {
                 panelItem.appendChild(album);
 
                 const duration = div.cloneNode();
-                duration.textContent = sources[i].duration.toFixed(1);
+                duration.textContent = UI._formatSecondsToTimestamp(sources[i].duration);
                 panelItem.appendChild(duration);
                 
                 fragment.appendChild(panelItem);
