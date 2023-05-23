@@ -21,24 +21,34 @@
     src: url("../assets/font/poppins/Bold.woff2") format("woff2");
 }
 
-@keyframes infiniteScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-3200px); }
-}
-
 @keyframes modalTransition {
     from { opacity: 0; transform: scale(1.2); }
     to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes dropdownTransition {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes infiniteScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-3200px); }
+}
+
 :root {
-    --active-color: #ff873c;
-    --scrollbar-thumb-color: #ff873c60;
-    --active-color-from-filter: invert(56%) sepia(99%) saturate(818%) hue-rotate(332deg) brightness(101%) contrast(101%);
+    --active-color: #585858;
+    --scrollbar-thumb-color: #ffffff60;
+    --active-color-from-filter: contrast(100%);
     --button-background-color: #d72227;
     --primary-text-color: #ffffff;
     --secondary-text-color: #cccccc;
     --tertiary-text-color: #dddddd;
+    
+    --bg-opacity: 0.3;
+    --topbar-height: 40px;
+    --navbar-width: 200px;
+    --panel-header-height: 90px;
 }
 
 * {
@@ -53,7 +63,7 @@ img {
 
 body {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: var(--navbar-width) 1fr;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -96,14 +106,14 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: var(--topbar-height);
     z-index: 1000;
 }
 
 .topbar .appicon-container {
     -webkit-app-region: none;
     position: relative;
-    width: 40px;
+    width: var(--topbar-height);
     height: 100%;
     z-index: 10;
 }
@@ -128,14 +138,14 @@ body {
 }
 
 .topbar .profile:hover {
-    backdrop-filter: contrast(80%);
+    backdrop-filter: contrast(90%);
 }
 
 .topbar .profile .profile-name {
-    opacity: 0.8;
     font-size: 12px;
     font-weight: bold;
     margin-right: 10px;
+    color: var(--tertiary-text-color);
 }
 
 .topbar .profile .profile-picture {
@@ -160,6 +170,7 @@ body {
 
 .topbar .profile .profile-dropdown.show {
     display: block;
+    animation: dropdownTransition 0.2s linear forwards;
 }
 
 .topbar .profile .profile-dropdown-option {
@@ -217,7 +228,7 @@ body {
 
 .bg-container {
 	position: absolute;
-	opacity: 1;
+	opacity: var(--bg-opacity);
 	width: 100vw;
 	height: 100vh;
 	transition: opacity 2s ease;
@@ -230,14 +241,13 @@ body {
 /* Navbar =================================================================== */
 
 .navbar {
+    position: relative;
     display: grid;
-    grid-template-rows: 30px 1fr 1fr;
+    grid-template-rows: var(--topbar-height) 1fr 1fr;
     width: 100%;
     height: 100%;
     max-height: 100vh;
     backdrop-filter: blur(5px);
-    background-color: rgba(20, 20, 20, 0.4);
-    z-index: 1;
 }
 
 .navbar .sources,
@@ -266,11 +276,12 @@ body {
     width: 24px;
     height: auto;
     border-radius: 5px;
+    transition: backdrop-filter 0.1s linear;
 }
 
 .navbar .sources .sources-title img:hover,
 .navbar .playlists .playlists-title img:hover {
-    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: contrast(60%);
 }
 
 .navbar .sources .sources-items,
@@ -295,6 +306,11 @@ body {
     background-color: var(--scrollbar-thumb-color);
 }
 
+.navbar .sources .sources-items::-webkit-scrollbar-thumb:hover,
+.navbar .playlists .playlists-items::-webkit-scrollbar-thumb:hover {
+    background-color: var(--active-color);
+}
+
 .navbar .sources .sources-items .source,
 .navbar .playlists .playlists-items .playlist {
     cursor: pointer;
@@ -305,6 +321,7 @@ body {
     border-radius: 5px;
     box-sizing: border-box;
     color: var(--secondary-text-color);
+    transition: backdrop-filter 0.1s linear;
 }
 
 .navbar .playlists .playlists-items .playlist:last-child {
@@ -313,17 +330,90 @@ body {
 
 .navbar .sources .sources-items .source:hover,
 .navbar .playlists .playlists-items .playlist:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    backdrop-filter: contrast(75%);
 }
 
 /* Main Panel =============================================================== */
 
 .main-panel {
+    display: grid;
+    grid-template-rows: var(--topbar-height) 1fr;
     width: 100%;
     height: 100%;
+    max-height: 100vh;
     backdrop-filter: blur(5px);
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 1;
+}
+
+.main-panel .panels {
+    width: 100%;
+    max-height: 100%;
+}
+
+.main-panel .panels .panel {
+    width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
+.main-panel .panels .panel .panel-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    width: 100%;
+    height: var(--panel-header-height);
+    padding: 5px 10px;
+    box-sizing: border-box;
+}
+
+.main-panel .panels .panel .panel-content {
+    width: 100%;
+    min-height: calc(100vh - var(--topbar-height) - var(--panel-header-height));
+    max-height: calc(100vh - var(--topbar-height) - var(--panel-header-height));
+    overflow-y: scroll;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.main-panel .panels .panel .panel-content::-webkit-scrollbar {
+    appearance: none;
+    width: 10px;
+}
+
+.main-panel .panels .panel .panel-content::-webkit-scrollbar-thumb {
+    height: 50px;
+    border-radius: 999px;
+    background-color: var(--scrollbar-thumb-color);
+}
+
+.main-panel .panels .panel .panel-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--active-color);
+}
+
+.main-panel .panels .panel .panel-content .panel-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr 2fr 1fr;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    padding: 20px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.main-panel .panels .panel .panel-content .panel-item:last-child {
+    margin-bottom: 105px;
+}
+
+.main-panel .panels .panel .panel-content .panel-item div {
+    text-align: center;
+}
+
+.main-panel .panels .panel .panel-content .panel-item div:first-child {
+    font-size: 14px;
+    text-align: left;
+}
+
+.main-panel .panels .panel .panel-content .panel-item div:last-child {
+    text-align: right;
 }
 
 /* Playbar ================================================================== */
@@ -354,7 +444,7 @@ body {
     height: 100%;
     padding: 10px;
     box-sizing: border-box;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(15px);
 }
 
 .playbar .controls .slider {

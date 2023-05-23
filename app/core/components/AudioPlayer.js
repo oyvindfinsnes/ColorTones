@@ -10,7 +10,7 @@ class AudioPlayer {
         this.trackHistory = [];        
         this.audioSources = {};
         this.currentIndex = 0;
-        this.currentSource = null;
+        this.currentSourcePath = null;
         this.playMode = this.PLAYMODE_STANDARD;
         
         this.isPlaystateFading = false;
@@ -26,17 +26,18 @@ class AudioPlayer {
         const generatedItems = 20;
         const shuffleQueue = [];
         const standardQueue = [];
-        const trackIDs = Object.keys(this.audioSources[this.currentSource].tracks);
-        const totalTracks = trackIDs.length;
-        const continuingIndex = trackIDs.findIndex(trackID => trackID === this.standardQueue.at(-1));
-        let standardQueueIndex = regenerate ? 0 : continuingIndex + 1;
+        const tracks = this.audioSources[this.currentSourcePath];
+        const totalTracks = tracks.length;
+        let standardQueueIndex = regenerate
+            ? 0
+            : tracks.findIndex(obj => obj.filename == this.standardQueue.at(-1).filename) + 1;
 
         for (let i = 0; i < generatedItems; i++) {
-            const shuffleItem = trackIDs[Math.floor(Math.random() * totalTracks)];
+            const shuffleItem = tracks[Math.floor(Math.random() * totalTracks)];
             shuffleQueue.push(shuffleItem);
 
             if (standardQueueIndex > totalTracks - 1) standardQueueIndex = 0;
-            const standardItem = trackIDs[standardQueueIndex];
+            const standardItem = tracks[standardQueueIndex];
             standardQueue.push(standardItem);
             standardQueueIndex++;
         }
@@ -72,10 +73,8 @@ class AudioPlayer {
         return this._getTrackPath(this.trackHistory[this.currentIndex]);
     }
 
-    static _getTrackPath(id) {
-        const baseName = this.audioSources[this.currentSource].basePath;
-        const fileName = this.audioSources[this.currentSource].tracks[id].fileName;
-        return baseName + "/" + fileName;
+    static _getTrackPath(trackItem) {
+        return trackItem.sourcepath + "/" + trackItem.filename;
     }
 
     static _handlePlaystateFading(operator) {
@@ -111,9 +110,8 @@ class AudioPlayer {
 
     // Public members ==========================================================
     
-    static getCurrentTrackDetails() {
-        const currentTrack = this.trackHistory[this.currentIndex];
-        return this.audioSources[this.currentSource].tracks[currentTrack];
+    static getCurrentTrackItem() {
+        return this.trackHistory[this.currentIndex];
     }
 
     static setVolume(value, isFloat = false) {
@@ -195,14 +193,14 @@ class AudioPlayer {
         }
     }
 
-    static updateCurrentSource(source) {
-        this.currentSource = source;
+    static updateCurrentSourcePath(sourcePath) {
+        this.currentSourcePath = sourcePath;
         this._generateQueues(true);
     }
 
-    static updateAudioSources(sources) {
-        if (Object.keys(sources).length > 0) {
-            this.audioSources = sources;
+    static updateAudioSources(sources, sourcePath) {
+        if (sources.length > 0) {
+            this.audioSources[sourcePath] = sources;
         }
     }
 };

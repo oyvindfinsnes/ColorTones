@@ -1,10 +1,16 @@
 class UI {
     static init() {
-        this.COLORS = {
+        /* this.COLORS = {
             bg: "#420e4e",
             accent1: "#9c1b37",
             accent2: "#d72227",
             highlight: "#fd751f"
+        }; */
+        this.COLORS = {
+            bg: "#121212",
+            accent1: "#B3005E",
+            accent2: "#E90064",
+            highlight: "#d72227"
         };
 
         this.modal = document.querySelector(".modal");
@@ -22,6 +28,8 @@ class UI {
         this.btnAddPlaylist = document.querySelector("#btnAddPlaylist");
         this.playlistsItems = document.querySelector(".playlists-items");
 
+        this.panelContent = document.querySelector("#panelContent");
+
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
         this.inpTimeline = document.querySelector("#inpTimeline");
@@ -34,9 +42,9 @@ class UI {
 
         this.isTimelineSeeking = false;
 
-        this._setupListeners();
-        /* this.activateEffects();
-        window.electronAPI.setAppBackground(UI.COLORS.bg); */
+        UI._setupListeners();
+        UI.setAppColors();
+        UI.Background.activateEffects();
     }
 
     static _setupListeners() {
@@ -79,13 +87,14 @@ class UI {
             : `${m}:${s >= 10 ? s : "0" + s}`;
     }
 
-    static activateEffects() {
-        const colors = [UI.COLORS.accent1, UI.COLORS.accent2, UI.COLORS.highlight];
-        Utilities.InterfaceEffects.applyBackgroundAnimation(...colors);
-    }
-
-    static deactivateEffects() {
-        Utilities.InterfaceEffects.removeBackgroundAnimation();
+    static setAppColors() {
+        const root = document.documentElement;
+        const activeColorFilter = Utilities.CSSFilterGenerator.compute(UI.COLORS.highlight);
+        
+        window.electronAPI.setAppBackground(UI.COLORS.bg);
+        root.style.setProperty("--active-color", UI.COLORS.highlight);
+        root.style.setProperty("--scrollbar-thumb-color", `${UI.COLORS.highlight}60`);
+        root.style.setProperty("--active-color-from-filter", activeColorFilter);
     }
 
     static Modal = class {
@@ -119,20 +128,11 @@ class UI {
             });
             
             const args = [e.detail.checkedRadioID, e.detail.isReversed, e.detail.sources, e.detail.sourcePath];
-            const { sources, sourceDir } = await window.electronAPI.finalizeSourceFiles(...args);
-            
-            //AudioPlayer.updateAudioSources(sources);
-            //AudioPlayer.updateCurrentSource(sourceDir);
-            //UI.Modal.handleDisplaySources();
+            const { sources, sourcePath } = await window.electronAPI.finalizeSourceFiles(...args);
+            AudioPlayer.updateAudioSources(sources, sourcePath);
+            AudioPlayer.updateCurrentSourcePath(sourcePath);
+            UI.MainPanel.rebuildSonglist(sources);
         }
-
-        /* static handleDisplaySources() {
-            const sources = AudioPlayer.audioSources;
-
-            for (const source in sources) {
-                const path = sources[source].basePath + "/" + source;
-            }
-        } */
     }
 
     static Topbar = class {
@@ -149,15 +149,66 @@ class UI {
         }
     }
 
+    static Background = class {
+        static activateEffects() {
+            Utilities.InterfaceEffects.applyBackgroundAnimation(UI.COLORS.accent1, UI.COLORS.accent2);
+        }
+    
+        static deactivateEffects() {
+            Utilities.InterfaceEffects.removeBackgroundAnimation();
+        }
+    }
+
     static Navbar = class {
         static handleSourcesUpdated() {
             //
         }
     }
 
+    static MainPanel = class {
+        static rebuildSonglist(sources) {
+            const totalItems = sources.length;
+            const fragment = document.createDocumentFragment();
+            const div = document.createElement("DIV");
+
+            for (let i = 0; i < totalItems; i++) {
+                const panelItem = div.cloneNode();
+                panelItem.classList.add("panel-item");
+                
+                const songNo = div.cloneNode();
+                songNo.textContent = i + 1;
+                panelItem.appendChild(songNo);
+
+                const title = div.cloneNode();
+                title.textContent = sources[i].title;
+                panelItem.appendChild(title);
+
+                const artist = div.cloneNode();
+                artist.textContent = sources[i].artist;
+                panelItem.appendChild(artist);
+
+                const album = div.cloneNode();
+                album.textContent = "album";
+                panelItem.appendChild(album);
+
+                const duration = div.cloneNode();
+                duration.textContent = sources[i].duration.toFixed(1);
+                panelItem.appendChild(duration);
+                
+                fragment.appendChild(panelItem);
+            }
+
+            while (panelContent.firstChild) {
+                panelContent.removeChild(panelContent.firstChild);
+            }
+
+            panelContent.appendChild(fragment);
+        }
+    }
+
     static Playbar = class {
         static handleTrackDetailsChange() {
-            const { title, artist, duration } = AudioPlayer.getCurrentTrackDetails();
+            const { title, artist, duration } = AudioPlayer.getCurrentTrackItem();
             const elapsed = UI._formatSecondsToTimestamp(0);
             const total = UI._formatSecondsToTimestamp(duration);
 

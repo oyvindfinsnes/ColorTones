@@ -24,14 +24,20 @@ class Modal {
                 try {
                     const metadata = await parseFile(path.join(sourcePath, audioFile));
                     const { artist, title } = metadata.common;
-                    const obj = { fileName: audioFile };
+                    const { duration } = metadata.format;
+
+                    const obj = {
+                        sourcepath: sourcePath,
+                        filename: audioFile,
+                        duration
+                    };
         
                     const hasArtist = artist !== undefined && artist.trim() !== "";
                     const hasTitle = title !== undefined && title.trim() !== "";
         
                     if (hasArtist && hasTitle) {
-                        obj["artist"] = metadata.common.artist;
-                        obj["title"] = metadata.common.title;
+                        obj["artist"] = artist;
+                        obj["title"] = title;
                     } else {
                         obj["unfinished"] = true;
                     }
@@ -45,7 +51,7 @@ class Modal {
             let pickedExample = null;
             sources.find(o => {
                 if (o.hasOwnProperty("unfinished")) {
-                    pickedExample = path.parse(o.fileName).name;
+                    pickedExample = path.parse(o.filename).name;
                     return true;
                 }
             });
@@ -96,7 +102,7 @@ class Modal {
             // Creating 3 different data structures to complete DB insert (with
             // data dependencies)
             for (const source of sources) {
-                const { fileName, artist, title, albumName, img } = source;
+                const { filename, artist, title, albumName, img } = source;
                 
                 artistNames.add(artist);
 
@@ -106,7 +112,7 @@ class Modal {
                 }
 
                 trackData.push({
-                    filename: fileName,
+                    filename: filename,
                     name: title,
                     albumname: albumName,
                     artistname: artist,
@@ -124,21 +130,21 @@ class Modal {
             sources = JSON.parse(sources);
             
             for (let i = 0; i < sources.length; i++) {
-                let { fileName, unfinished } = sources[i];
+                let { filename, unfinished } = sources[i];
 
                 if (unfinished) {
                     delete sources[i]["unfinished"];
-                    fileName = path.parse(fileName).name;
+                    filename = path.parse(filename).name;
 
                     switch (checkedRadioID) {
                         case "inpTrack":
-                            sources[i]["title"] = fileName.trim();
+                            sources[i]["title"] = filename.trim();
                             break;
                         case "inpArtist":
-                            sources[i]["artist"] = fileName.trim();
+                            sources[i]["artist"] = filename.trim();
                             break;
                         case "inpTrackArtist":
-                            let parts = fileName.split(" - ");
+                            let parts = filename.split(" - ");
     
                             if (isReversed) {
                                 sources[i]["title"] = parts[0].trim();
@@ -158,7 +164,7 @@ class Modal {
                 res(true);
             });
             
-            return { sources, sourceDir: path.basename(sourcePath) };
+            return { sources, sourcePath };
         }
     }
 

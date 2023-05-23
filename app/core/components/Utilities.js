@@ -13,12 +13,12 @@ class Utilities {
             }
         }
 
-        static applyBackgroundAnimation(accent1, accent2, highlight) {
+        static applyBackgroundAnimation(accent1, accent2) {
             const totalLights = 20;
             const size = 180;
             const softness = 180;
             const animationDurationS = 35;
-            const colors = [accent1, accent1, accent2, accent2, highlight];
+            const colors = [accent1, accent2];
             const container = document.querySelector(".bg-container");
             const fragment = document.createDocumentFragment();
             let sheetContent = "";
@@ -76,7 +76,7 @@ class Utilities {
         Class derived from //https://github.com/angel-rs/css-color-filter-generator
         A few integration changes have been made to the original code
     */
-    static cssFilterGenerator = class {
+    static CSSFilterGenerator = class {
         static compute = inputColor => {
             const hexToRgb = hex => {
                 const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -86,10 +86,10 @@ class Utilities {
             let bestResult = null;
             let bestLoss = Infinity;
             const rgb = hexToRgb(inputColor);
-            const color = new Utilities.cssFilterGenerator.Color(rgb[0], rgb[1], rgb[2]);
+            const color = new Utilities.CSSFilterGenerator.Color(rgb[0], rgb[1], rgb[2]);
         
             for (let i = 0; i < 50; i++) {
-                const result = new Utilities.cssFilterGenerator.Solver(color).solve();
+                const result = new Utilities.CSSFilterGenerator.Solver(color).solve();
         
                 if (result.loss < bestLoss) {
                     bestResult = result;
@@ -102,8 +102,8 @@ class Utilities {
     }
 }
 
-// cssFilterGenerator child classes ============================================
-Utilities.cssFilterGenerator.Color = class Color {
+// CSSFilterGenerator child classes ============================================
+Utilities.CSSFilterGenerator.Color = class Color {
     constructor(r, g, b) {
         this.set(r, g, b);
     }
@@ -239,11 +239,11 @@ Utilities.cssFilterGenerator.Color = class Color {
     }
 }
 
-Utilities.cssFilterGenerator.Solver = class Solver {
+Utilities.CSSFilterGenerator.Solver = class Solver {
     constructor(target) {
         this.target = target;
         this.targetHSL = target.hsl();
-        this.reusedColor = new Utilities.cssFilterGenerator.Color(0, 0, 0);
+        this.reusedColor = new Utilities.CSSFilterGenerator.Color(0, 0, 0);
     }
 
     solve() {
