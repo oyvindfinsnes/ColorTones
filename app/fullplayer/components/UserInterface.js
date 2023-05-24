@@ -25,7 +25,7 @@ class UI {
         this.btnAddPlaylist = document.querySelector("#btnAddPlaylist");
         this.playlistsItems = document.querySelector(".playlists-items");
 
-        this.panelContent = document.querySelector("#panelContent");
+        this.panels = document.querySelector("#panels");
 
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
@@ -79,6 +79,11 @@ class UI {
         UI.btnAddPlaylist.querySelector("img").addEventListener("click", () => {
             UI.Modal.handleOpen("newPlaylistModal");
         });
+        [...document.querySelectorAll(".general .general-item")].forEach(item => {
+            item.addEventListener("click", () => {
+                UI.MainPanel.handleSwitchActivePanel(item.dataset.targetpanel);
+            });
+        });
 
         // Playbar
         UI.btnSkipPrevious.addEventListener("click", () => {
@@ -101,17 +106,6 @@ class UI {
                 UI.Playbar.handleSliderChange(e);
             });
         });
-    }
-
-    static _formatSecondsToTimestamp(seconds) {
-        const t = Math.floor(seconds);
-        const h = Math.floor(t / 3600);
-        const m = Math.floor(t / 60) % 60;
-        const s = t % 60;
-    
-        return h
-            ? `${h}:${m >= 10 ? m : "0" + m}:${s >= 10 ? s : "0" + s}`
-            : `${m}:${s >= 10 ? s : "0" + s}`;
     }
 
     static setAppColors() {
@@ -162,7 +156,15 @@ class UI {
             const { sources, sourcePath } = await window.electronAPI.finalizeSourceFiles(...args);
             AudioPlayer.updateAudioSources(sources, sourcePath);
             AudioPlayer.updateCurrentSourcePath(sourcePath);
-            UI.MainPanel.rebuildSonglist(sources);
+            
+            const panelHeader = {
+                title: sourcePath.split(/[\\/]/).pop(),
+                totalTracks: sources.length,
+                totalTime: sources.reduce((acc, a) => acc + a.duration, 0),
+                sourceID: sourcePath.replace(/[\\\/|\:]/g, "")
+            };
+            UI.MainPanel.generatePanel(panelHeader, sources);
+            UI.Navbar.addSource(panelHeader.title, panelHeader.sourceID);
         }
     }
 
@@ -192,18 +194,34 @@ class UI {
     }
 
     static Navbar = class {
-        static handleSourcesUpdated() {
-            //
+        static addSource(name, panelID) {
+            const sourceItem = document.createElement("SPAN");
+
+            sourceItem.textContent = name;
+            sourceItem.classList.add("source");
+            sourceItem.dataset.paneltarget = panelID;
+            sourceItem.addEventListener("click", () => {
+                UI.MainPanel.handleSwitchActivePanel(panelID);
+            });
+            
+            UI.sourcesItems.appendChild(sourceItem);
         }
     }
 
     static MainPanel = class {
-        static rebuildSonglist(sources) {
-            const totalItems = sources.length;
-            const fragment = document.createDocumentFragment();
-            const div = document.createElement("DIV");
+        static handleSwitchActivePanel(id) {
+            [...document.querySelectorAll(".main-panel .panel")].forEach(panel => {
+                panel.classList.remove("active");
+                if (panel.id == id) panel.classList.add("active");
+            });
+        }
 
-            for (let i = 0; i < totalItems; i++) {
+        static generatePanel(sourceDetails, sources) {
+            const div = document.createElement("DIV");
+            const { title, totalTracks, totalTime, sourceID} = sourceDetails;
+
+            const itemsFragment = document.createDocumentFragment();
+            for (let i = 0; i < sources.length; i++) {
                 const panelItem = div.cloneNode();
                 panelItem.classList.add("panel-item");
                 
@@ -224,25 +242,42 @@ class UI {
                 panelItem.appendChild(album);
 
                 const duration = div.cloneNode();
-                duration.textContent = UI._formatSecondsToTimestamp(sources[i].duration);
+                duration.textContent = Utilities.formatSecondsToTimestamp(sources[i].duration);
                 panelItem.appendChild(duration);
                 
-                fragment.appendChild(panelItem);
+                itemsFragment.appendChild(panelItem);
             }
 
-            while (panelContent.firstChild) {
-                panelContent.removeChild(panelContent.firstChild);
-            }
+            const serializer = new XMLSerializer();
+		    const panelItems = serializer.serializeToString(itemsFragment);
+            const details = `Total Tracks: ${totalTracks}, ${Utilities.formatSecondsToTimestamp(totalTime, true)}`;
+            
+            const panel = div.cloneNode();
+            panel.id = sourceID;
+            panel.classList.add("panel");
 
-            panelContent.appendChild(fragment);
+            panel.innerHTML = `
+                <div class="panel-header">
+                    <div>
+                        <img class="panel-icon" src="">
+                        <span class="panel-title">Source: ${title}</span>
+                    </div>
+                    <div>
+                        <span class="panel-details">${details}</span>
+                    </div>
+                </div>
+                <div class="panel-content">${panelItems}</div>
+            `;
+
+            UI.panels.appendChild(panel);
         }
     }
 
     static Playbar = class {
         static handleTrackDetailsChange() {
             const { title, artist, duration } = AudioPlayer.getCurrentTrackItem();
-            const elapsed = UI._formatSecondsToTimestamp(0);
-            const total = UI._formatSecondsToTimestamp(duration);
+            const elapsed = Utilities.formatSecondsToTimestamp(0);
+            const total = Utilities.formatSecondsToTimestamp(duration);
 
             UI.inpTimeline.max = duration;
 
@@ -296,7 +331,7 @@ class UI {
 
             if (slider.id == UI.inpTimeline.id) {
                 const elapsed = UI.inpTimeline.value;
-                const timestamp = UI._formatSecondsToTimestamp(elapsed);
+                const timestamp = Utilities.formatSecondsToTimestamp(elapsed);
                 UI.timeElapsed.textContent = timestamp;
             }
         

@@ -1,4 +1,5 @@
 const { app, Menu, Tray, BrowserWindow } = require("electron");
+const schedule = require("node-schedule");
 const sqlite3 = require("sqlite3");
 const path = require("path");
 const fs = require("fs");
@@ -61,6 +62,10 @@ const setup = () => {
     
     registerAppHandlers();
     registerRendererHandlers();
+
+    schedule.scheduleJob("*/30 * * * *", () => {
+        console.log("Job working!");
+    });
 }
 
 Menu.setApplicationMenu(null);

@@ -32,7 +32,16 @@
     <div class="bg-container inactive"></div>
 
     <div class="navbar">
-        <div></div>
+        <div class="general">
+            <span class="general-item" data-targetpanel="generalHome">
+                <img src="../assets/icon/ui/home.png" />
+                Home
+            </span>
+            <span class="general-item" data-targetpanel="generalStatistics">
+                <img src="../assets/icon/ui/statistics.png" />
+                Statistics
+            </span>
+        </div>
         <div class="sources">
             <span id="btnAddSource" class="sources-title">
                 My sources
@@ -45,26 +54,18 @@
                 My playlists
                 <img src="../assets/icon/ui/add.png" />
             </span>
-            <div class="playlists-items">
-                <span class="playlist">Playlist</span>
-            </div>
+            <div class="playlists-items"></div>
         </div>
     </div>
 
     <div class="main-panel">
-        <div></div>
-        <div class="panels">
-            <div id="sourceMusic" class="panel">
-                <div class="panel-header">
-                    <div>
-                        <img class="panel-icon" src="">
-                        <span class="panel-title">Source: Music</span>
-                    </div>
-                    <div>
-                        <span class="panel-details"></span>
-                    </div>
-                </div>
-                <div id="panelContent" class="panel-content"></div>
+        <div id="panels" class="panels">
+            <div id="generalHome" class="panel active">
+                Allo Home
+            </div>
+
+            <div id="generalStatistics" class="panel">
+                Allo Statistics
             </div>
         </div>
     </div>

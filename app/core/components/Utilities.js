@@ -1,4 +1,25 @@
 class Utilities {
+    static formatSecondsToTimestamp(seconds, formatTimeComponents = false) {
+        const t = Math.floor(seconds);
+        const h = Math.floor(t / 3600);
+        const m = Math.floor(t / 60) % 60;
+        const s = t % 60;
+    
+        if (formatTimeComponents) {
+            return h
+                ? `${h}hr ${m >= 10 ? m : "0" + m}min`
+                : `${m}min ${s >= 10 ? s : "0" + s}sec`;
+        }
+
+        return h
+            ? `${h}:${m >= 10 ? m : "0" + m}:${s >= 10 ? s : "0" + s}`
+            : `${m}:${s >= 10 ? s : "0" + s}`;
+    }
+    
+    static remap = (val, inMin, inMax, outMin, outMax) => {
+        return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
+
     static InterfaceEffects = class {
         static _getRandomFloat(min, max) {
             return (Math.random() * (max - min) + min);
