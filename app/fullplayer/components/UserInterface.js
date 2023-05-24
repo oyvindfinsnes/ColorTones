@@ -80,9 +80,7 @@ class UI {
             UI.Modal.handleOpen("newPlaylistModal");
         });
         [...document.querySelectorAll(".general .general-item")].forEach(item => {
-            item.addEventListener("click", () => {
-                UI.MainPanel.handleSwitchActivePanel(item.dataset.targetpanel);
-            });
+            item.addEventListener("click", () => UI.Navbar.handleLinkClicked(item));
         });
 
         // Playbar
@@ -199,12 +197,23 @@ class UI {
 
             sourceItem.textContent = name;
             sourceItem.classList.add("source");
-            sourceItem.dataset.paneltarget = panelID;
+            sourceItem.dataset.targetpanel = panelID;
             sourceItem.addEventListener("click", () => {
-                UI.MainPanel.handleSwitchActivePanel(panelID);
+                UI.Navbar.handleLinkClicked(sourceItem);
             });
             
             UI.sourcesItems.appendChild(sourceItem);
+        }
+
+        static handleLinkClicked(targetLinkItem) {
+            [...document.querySelectorAll("[data-targetpanel]")].forEach(linkItem => {
+                linkItem.classList.remove("active");
+
+                if (linkItem == targetLinkItem) {
+                    linkItem.classList.add("active");
+                    UI.MainPanel.handleSwitchActivePanel(linkItem.dataset.targetpanel);
+                }
+            });
         }
     }
 
@@ -217,47 +226,28 @@ class UI {
         }
 
         static generatePanel(sourceDetails, sources) {
-            const div = document.createElement("DIV");
+            const panelItems = [];
             const { title, totalTracks, totalTime, sourceID} = sourceDetails;
-
-            const itemsFragment = document.createDocumentFragment();
-            for (let i = 0; i < sources.length; i++) {
-                const panelItem = div.cloneNode();
-                panelItem.classList.add("panel-item");
-                
-                const songNo = div.cloneNode();
-                songNo.textContent = i + 1;
-                panelItem.appendChild(songNo);
-
-                const title = div.cloneNode();
-                title.textContent = sources[i].title;
-                panelItem.appendChild(title);
-
-                const artist = div.cloneNode();
-                artist.textContent = sources[i].artist;
-                panelItem.appendChild(artist);
-
-                const album = div.cloneNode();
-                album.textContent = "album";
-                panelItem.appendChild(album);
-
-                const duration = div.cloneNode();
-                duration.textContent = Utilities.formatSecondsToTimestamp(sources[i].duration);
-                panelItem.appendChild(duration);
-                
-                itemsFragment.appendChild(panelItem);
-            }
-
-            const serializer = new XMLSerializer();
-		    const panelItems = serializer.serializeToString(itemsFragment);
             const details = `Total Tracks: ${totalTracks}, ${Utilities.formatSecondsToTimestamp(totalTime, true)}`;
-            
-            const panel = div.cloneNode();
+
+            const panel = document.createElement("DIV");
             panel.id = sourceID;
             panel.classList.add("panel");
+            
+            for (let i = 0; i < sources.length; i++) {
+                panelItems.push(`
+                    <div class="panel-item">
+                        <div>${i + 1}</div>
+                        <div>${sources[i].title}</div>
+                        <div>${sources[i].artist}</div>
+                        <div>album</div>
+                        <div>${Utilities.formatSecondsToTimestamp(sources[i].duration)}</div>
+                    </div>
+                `);
+            }
 
             panel.innerHTML = `
-                <div class="panel-header">
+                <div class="panel-header-top">
                     <div>
                         <img class="panel-icon" src="">
                         <span class="panel-title">Source: ${title}</span>
@@ -266,7 +256,14 @@ class UI {
                         <span class="panel-details">${details}</span>
                     </div>
                 </div>
-                <div class="panel-content">${panelItems}</div>
+                <div class="panel-header-bottom">
+                    <div>#</div>
+                    <div>Track Title</div>
+                    <div>Artist</div>
+                    <div>Album</div>
+                    <div>Duration</div>
+                </div>
+                <div class="panel-content">${panelItems.join("")}</div>
             `;
 
             UI.panels.appendChild(panel);
