@@ -35,13 +35,13 @@ class UI {
         this.btnSkipPrevious = document.querySelector("#btnSkipPrevious");
         this.btnPlay = document.querySelector("#btnPlay");
         this.btnSkipNext = document.querySelector("#btnSkipNext");
-        this.inpVolume = document.querySelector("#inpVolume");
+        this.btnExpand = document.querySelector("#btnExpand");
         this.toggleButtons = [
-            document.querySelector("#btnExpand"),
             document.querySelector("#btnShuffle"),
             document.querySelector("#btnRepeat"),
             document.querySelector("#btnEnhance")
         ];
+        this.inpVolume = document.querySelector("#inpVolume");
 
         this.isTimelineSeeking = false;
 
@@ -78,10 +78,10 @@ class UI {
         });
 
         // Navbar
-        UI.btnAddSource.querySelector("img").addEventListener("click", () => {
+        UI.btnAddSource.querySelector(".btn-add").addEventListener("click", () => {
             UI.Modal.handleOpen("newSourceModal");
         });
-        UI.btnAddPlaylist.querySelector("img").addEventListener("click", () => {
+        UI.btnAddPlaylist.querySelector(".btn-add").addEventListener("click", () => {
             UI.Modal.handleOpen("newPlaylistModal");
         });
         [...document.querySelectorAll(".general .general-item")].forEach(item => {
@@ -188,8 +188,17 @@ class UI {
         }
 
         static handleDropdownOption(option) {
-            if (option.id == "dropdownSettings") UI.Modal.handleOpen("settingsModal");
-            else if (option.id == "dropdownQuit") window.electronAPI.quitApp();
+            switch (option.id) {
+                case "dropdownProfile":
+                    UI.Modal.handleOpen("profileModal");
+                    break;
+                case "dropdownSettings":
+                    UI.Modal.handleOpen("settingsModal");
+                    break;
+                case "dropdownQuit":
+                    window.electronAPI.quitApp();
+                    break;
+            }
         }
     }
 
@@ -275,11 +284,13 @@ class UI {
             for (let i = 0; i < sources.length; i++) {
                 panelItems.push(`
                     <div class="panel-item">
+                        <div class="panel-button"><img src="../assets/icon/ui/play-white.png" /></div>
                         <div>${i + 1}</div>
                         <div>${sources[i].title}</div>
                         <div>${sources[i].artist}</div>
                         <div>${sources[i].album ? sources[i].album : ""}</div>
                         <div>${Utilities.formatSecondsToTimestamp(sources[i].duration)}</div>
+                        <div class="panel-button"><img src="../assets/icon/ui/more.png" /></div>
                     </div>
                 `);
             }
@@ -293,11 +304,13 @@ class UI {
                     </div>
                 </div>
                 <div class="panel-header-bottom">
+                    <div class="panel-button"></div>
                     <div>#</div>
                     <div>Title</div>
                     <div>Artist</div>
                     <div>Album</div>
                     <div>Duration</div>
+                    <div class="panel-button"></div>
                 </div>
                 <div class="panel-content">${panelItems.join("")}</div>
             `;

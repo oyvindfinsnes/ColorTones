@@ -290,9 +290,9 @@ body {
 
 .navbar .sources .sources-title,
 .navbar .playlists .playlists-title {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
     height: 25px;
     font-size: 16px;
     font-weight: bold;
@@ -302,15 +302,22 @@ body {
 
 .navbar .sources .sources-title img,
 .navbar .playlists .playlists-title img {
+    width: 22px;
+    margin-right: 10px;
+}
+
+.navbar .sources .sources-title .btn-add,
+.navbar .playlists .playlists-title .btn-add {
     cursor: pointer;
+    margin: 0;
     width: 24px;
-    height: auto;
     border-radius: 5px;
+    justify-self: right;
     transition: backdrop-filter 0.1s linear;
 }
 
-.navbar .sources .sources-title img:hover,
-.navbar .playlists .playlists-title img:hover {
+.navbar .sources .sources-title .btn-add:hover,
+.navbar .playlists .playlists-title .btn-add:hover {
     backdrop-filter: contrast(60%);
 }
 
@@ -346,11 +353,11 @@ body {
     cursor: pointer;
     display: block;
     width: 100%;
-    padding: 5px;
     font-size: 14px;
     font-weight: 700;
     border-radius: 5px;
     box-sizing: border-box;
+    padding: 5px 5px 5px 20px;
     color: var(--secondary-text-color);
     transition: backdrop-filter 0.1s linear, color 0.1s linear;
 }
@@ -434,10 +441,26 @@ body {
 .main-panel .panels .panel .panel-header-bottom,
 .main-panel .panels .panel .panel-content .panel-item {
     display: grid;
-    grid-template-columns: 1fr 2fr 2fr 2fr 1fr;
     justify-content: space-between;
+    grid-template-columns: auto 1fr 2fr 2fr 2fr 1fr auto;
     gap: 20px;
     box-sizing: border-box;
+}
+
+.main-panel .panels .panel .panel-header-bottom .panel-button,
+.main-panel .panels .panel .panel-content .panel-item .panel-button {
+    opacity: 0;
+    width: 28px;
+    margin-top: -4px; /* Beautiful hack */
+}
+
+.main-panel .panels .panel .panel-content .panel-item .panel-button:hover {
+    transform: scale(1.15);
+}
+
+.main-panel .panels .panel .panel-content .panel-item .panel-button img {
+    cursor: pointer;
+    width: 100%;
 }
 
 .main-panel .panels .panel .panel-header-bottom {
@@ -465,6 +488,10 @@ body {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
+.main-panel .panels .panel .panel-content .panel-item:hover > .panel-button {
+    opacity: 1;
+}
+
 .main-panel .panels .panel .panel-content .panel-item:last-child {
     margin-bottom: 105px;
 }
@@ -477,14 +504,14 @@ body {
     text-overflow: ellipsis;
 }
 
-.main-panel .panels .panel .panel-header-bottom div:first-child,
-.main-panel .panels .panel .panel-content .panel-item div:first-child {
+.main-panel .panels .panel .panel-header-bottom div:nth-child(2),
+.main-panel .panels .panel .panel-content .panel-item div:nth-child(2) {
     font-size: 14px;
     text-align: left;
 }
 
-.main-panel .panels .panel .panel-header-bottom div:last-child,
-.main-panel .panels .panel .panel-content .panel-item div:last-child {
+.main-panel .panels .panel .panel-header-bottom div:nth-last-child(-2),
+.main-panel .panels .panel .panel-content .panel-item div:nth-last-child(-2) {
     text-align: right;
 }
 
