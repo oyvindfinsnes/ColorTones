@@ -447,6 +447,13 @@ body {
     box-sizing: border-box;
 }
 
+.main-panel .panels .panel .panel-header-bottom img {
+    width: 20px;
+    margin-right: 5px;
+    align-self: center;
+    vertical-align: sub;
+}
+
 .main-panel .panels .panel .panel-header-bottom .panel-button,
 .main-panel .panels .panel .panel-content .panel-item .panel-button {
     opacity: 0;
@@ -470,10 +477,6 @@ body {
     font-weight: 500;
     padding: 10px 20px;
     backdrop-filter: blur(10px);
-}
-
-.main-panel .panels .panel .panel-content {
-    max-height: 100%;
 }
 
 .main-panel .panels .panel .panel-content .panel-item {
@@ -510,8 +513,8 @@ body {
     text-align: left;
 }
 
-.main-panel .panels .panel .panel-header-bottom div:nth-last-child(-2),
-.main-panel .panels .panel .panel-content .panel-item div:nth-last-child(-2) {
+.main-panel .panels .panel .panel-header-bottom div:nth-last-child(2),
+.main-panel .panels .panel .panel-content .panel-item div:nth-last-child(2) {
     text-align: right;
 }
 

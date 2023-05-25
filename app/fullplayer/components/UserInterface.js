@@ -306,10 +306,22 @@ class UI {
                 <div class="panel-header-bottom">
                     <div class="panel-button"></div>
                     <div>#</div>
-                    <div>Title</div>
-                    <div>Artist</div>
-                    <div>Album</div>
-                    <div>Duration</div>
+                    <div>
+                        <img src="../assets/icon/ui/track.png" />
+                        Title
+                    </div>
+                    <div>
+                        <img src="../assets/icon/ui/artist.png" />
+                        Artist
+                    </div>
+                    <div>
+                        <img src="../assets/icon/ui/album.png" />
+                        Album
+                    </div>
+                    <div>
+                        <img src="../assets/icon/ui/duration.png" />
+                        Duration
+                    </div>
                     <div class="panel-button"></div>
                 </div>
                 <div class="panel-content">${panelItems.join("")}</div>
