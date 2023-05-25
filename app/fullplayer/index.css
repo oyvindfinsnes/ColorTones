@@ -44,10 +44,10 @@
     --highlight-color-from-filter: contrast(100%);
 
     --primary-text-color: #ffffff;
-    --secondary-text-color: #cccccc;
+    --secondary-text-color: #dddddd;
     --tertiary-text-color: #dddddd;
     --scrollbar-thumb-color: #ffffff60;
-    --modal-background: radial-gradient(#202020, #151515);
+    --modal-background: radial-gradient(#202020, #121212);
     
     --bg-opacity: 0.3;
     --topbar-height: 40px;
@@ -431,7 +431,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 2fr 2fr 2fr 1fr;
     justify-content: space-between;
-    padding: 20px;
+    gap: 20px;
     font-size: 12px;
     box-sizing: border-box;
 }
@@ -439,7 +439,8 @@ body {
 .main-panel .panels .panel .panel-header-bottom {
     position: sticky;
     top: 0;
-    backdrop-filter: blur(5px);
+    padding: 10px 20px;
+    backdrop-filter: blur(10px);
 }
 
 .main-panel .panels .panel .panel-content {
@@ -448,6 +449,7 @@ body {
 
 .main-panel .panels .panel .panel-content .panel-item {
     height: 60px;
+    padding: 20px;
     transition: backdrop-filter 0.1s linear;
 }
 
@@ -463,6 +465,9 @@ body {
 .main-panel .panels .panel .panel-header-bottom div,
 .main-panel .panels .panel .panel-content .panel-item div {
     text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .main-panel .panels .panel .panel-header-bottom div:first-child,
@@ -556,12 +561,13 @@ body {
 
 .playbar .controls .button img {
     width: 30px;
-    height: auto;
     margin: 0 8px;
 }
 
 .playbar .controls .button.active img {
-    filter: var(--highlight-color-from-filter);
+    filter:
+        var(--highlight-color-from-filter)
+        drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
 }
 
 .playbar .controls .details {
@@ -611,6 +617,16 @@ body {
     transform: scale(1.05);
 }
 
+.playbar .controls .action-center .player-buttons .expand img {
+    margin-right: 30px;
+}
+
+.playbar .controls .action-center .player-buttons .enhance img {
+    margin-left: 30px;
+}
+
+.playbar .controls .action-center .player-buttons .expand img,
+.playbar .controls .action-center .player-buttons .enhance img,
 .playbar .controls .action-center .player-buttons .shuffle img,
 .playbar .controls .action-center .player-buttons .repeat img {
     width: 22px;

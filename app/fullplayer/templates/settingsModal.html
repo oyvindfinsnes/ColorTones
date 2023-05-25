@@ -1,0 +1,45 @@
+<style>
+    .modal .container {
+        position: relative;
+        width: 90vh;
+        height: 90vh;
+        padding: 20px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
+        background: var(--modal-background);
+    }
+
+    .modal .container .modal-close {
+        position: absolute;
+        cursor: pointer;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: auto;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .modal .container .modal-close:hover {
+        opacity: 1;
+    }
+</style>
+
+<div class="container">
+    <img class="modal-close" src="../assets/icon/ui/close.png" />
+
+    <div class="content">
+        <span class="location-title">Settings</span>
+    </div>
+</div>
+
+<script>
+    document.querySelector(".modal-close").addEventListener("click", () => {
+        document.querySelector(".modal").innerHTML = "";
+        document.querySelector(".modal").classList.remove("active");
+        [...document.querySelectorAll("script")].forEach(script => {
+            if (script.id !== "") document.body.removeChild(script);
+        });
+    });
+</script>

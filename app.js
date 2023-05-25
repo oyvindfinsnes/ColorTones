@@ -39,10 +39,10 @@ const createMainWindow = () => {
     mainWindow = new BrowserWindow({
         show: false,
         frame: false,
-        width: 1200,
-        height: 700,
-        minWidth: 650,
-        minHeight: 600,
+        width: 1500,
+        height: 850,
+        minWidth: 700,
+        minHeight: 500,
         backgroundColor: "#121212",
         icon: iconPath,
         webPreferences: { preload: path.join(__dirname, "preload.js") }
@@ -53,7 +53,7 @@ const createMainWindow = () => {
     mainWindow.once("ready-to-show", () => mainWindow.show());
     mainWindow.loadURL(path.join(__dirname, "app", "fullplayer", "index.html"));
 
-    mainWindow.webContents.openDevTools();
+    setTimeout(() => mainWindow.webContents.openDevTools(), 1000);
 }
 
 const setup = () => {
@@ -63,7 +63,7 @@ const setup = () => {
     registerAppHandlers();
     registerRendererHandlers();
 
-    schedule.scheduleJob("*/30 * * * *", () => {
+    schedule.scheduleJob("*/15 * * * *", () => {
         console.log("Job working!");
     });
 }

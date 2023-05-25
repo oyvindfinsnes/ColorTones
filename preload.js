@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     quitApp: () => ipcRenderer.send("quitApp"),
     setAppBackground: (...args) => ipcRenderer.send("setAppBackground", ...args),
     requestTemplate: (...args) => ipcRenderer.invoke("requestTemplate", ...args),
+    requestDatabaseInteraction: (...args) => ipcRenderer.invoke("requestDatabaseInteraction", ...args),
     folderSelectSource: () => ipcRenderer.invoke("folderSelectSource"),
     finalizeSourceFiles: (...args) => ipcRenderer.invoke("finalizeSourceFiles", ...args)
 });

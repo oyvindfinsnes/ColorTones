@@ -36,12 +36,17 @@ class UI {
         this.btnPlay = document.querySelector("#btnPlay");
         this.btnSkipNext = document.querySelector("#btnSkipNext");
         this.inpVolume = document.querySelector("#inpVolume");
+        this.toggleButtons = [
+            document.querySelector("#btnExpand"),
+            document.querySelector("#btnShuffle"),
+            document.querySelector("#btnRepeat"),
+            document.querySelector("#btnEnhance")
+        ];
 
         this.isTimelineSeeking = false;
 
         UI._setupListeners();
-        UI.setAppColors();
-        UI.Background.activateEffects();
+        UI._init();
     }
 
     static _setupListeners() {
@@ -99,11 +104,26 @@ class UI {
         UI.inpTimeline.addEventListener("change", () => {
             UI.Playbar.handleTimelineChange();
         });
+        UI.toggleButtons.forEach(toggle => {
+            toggle.addEventListener("click", () => {
+                toggle.classList.toggle("active");
+            });
+        });
         [...document.querySelectorAll(".slider")].forEach(slider => {
             slider.addEventListener("input", e => {
                 UI.Playbar.handleSliderChange(e);
             });
         });
+    }
+
+    static async _init() {
+        UI.setAppColors();
+        UI.Background.activateEffects();
+        
+        const sourceItems = await window.electronAPI.requestDatabaseInteraction("getSourceItems");
+        for (const sourceItem of sourceItems) {
+            UI.Navbar.addSource(sourceItem.path);
+        }
     }
 
     static setAppColors() {
@@ -147,22 +167,14 @@ class UI {
             UI.modal.classList.remove("active");
             // Only the removable scripts will have an ID
             [...document.querySelectorAll("script")].forEach(script => {
-                if (script.id !== "") document.body.removeChild(script);
+                if (script.id != "") document.body.removeChild(script);
             });
             
             const args = [e.detail.checkedRadioID, e.detail.isReversed, e.detail.sources, e.detail.sourcePath];
             const { sources, sourcePath } = await window.electronAPI.finalizeSourceFiles(...args);
-            AudioPlayer.updateAudioSources(sources, sourcePath);
-            AudioPlayer.updateCurrentSourcePath(sourcePath);
             
-            const panelHeader = {
-                title: sourcePath.split(/[\\/]/).pop(),
-                totalTracks: sources.length,
-                totalTime: sources.reduce((acc, a) => acc + a.duration, 0),
-                sourceID: sourcePath.replace(/[\\\/|\:]/g, "")
-            };
-            UI.MainPanel.generatePanel(panelHeader, sources);
-            UI.Navbar.addSource(panelHeader.title, panelHeader.sourceID);
+            UI.Navbar.addSource(sourcePath);
+            UI.MainPanel.generatePanel(sourcePath, sources);
         }
     }
 
@@ -176,7 +188,8 @@ class UI {
         }
 
         static handleDropdownOption(option) {
-            if (option.id == "dropdownQuit") window.electronAPI.quitApp();
+            if (option.id == "dropdownSettings") UI.Modal.handleOpen("settingsModal");
+            else if (option.id == "dropdownQuit") window.electronAPI.quitApp();
         }
     }
 
@@ -192,12 +205,15 @@ class UI {
     }
 
     static Navbar = class {
-        static addSource(name, panelID) {
+        static addSource(sourcePath) {
             const sourceItem = document.createElement("SPAN");
+            const name = sourcePath.split(/[\\/]/).pop();
+            const panelID = sourcePath.replace(/[\\\/|\:]/g, "");
 
             sourceItem.textContent = name;
             sourceItem.classList.add("source");
             sourceItem.dataset.targetpanel = panelID;
+            sourceItem.dataset.sourcepath = sourcePath;
             sourceItem.addEventListener("click", () => {
                 UI.Navbar.handleLinkClicked(sourceItem);
             });
@@ -211,36 +227,58 @@ class UI {
 
                 if (linkItem == targetLinkItem) {
                     linkItem.classList.add("active");
-                    UI.MainPanel.handleSwitchActivePanel(linkItem.dataset.targetpanel);
+                    UI.MainPanel.handleSwitchActivePanel(linkItem);
                 }
             });
         }
     }
 
     static MainPanel = class {
-        static handleSwitchActivePanel(id) {
+        static async handleSwitchActivePanel(linkItem) {
+            const sourcePath = linkItem.dataset.sourcepath;
+            
+            let targetPanel = document.querySelector(`#${linkItem.dataset.targetpanel}`);
+            if (!document.body.contains(targetPanel)) {
+                await UI.MainPanel.generatePanel(sourcePath);
+                targetPanel = document.querySelector(`#${linkItem.dataset.targetpanel}`);
+            }
+
+            /* if (!AudioPlayer.hasSource(sourcePath)) {
+                AudioPlayer.updateAudioSources(sources, sourcePath);
+            }
+            
+            AudioPlayer.updateCurrentSourcePath(sourcePath); */
+
             [...document.querySelectorAll(".main-panel .panel")].forEach(panel => {
                 panel.classList.remove("active");
-                if (panel.id == id) panel.classList.add("active");
+                if (panel.id == targetPanel.id) panel.classList.add("active");
             });
         }
 
-        static generatePanel(sourceDetails, sources) {
-            const panelItems = [];
-            const { title, totalTracks, totalTime, sourceID} = sourceDetails;
+        static async generatePanel(sourcePath, sources = null) {
+            if (sources == null) {
+                const args = ["getDataFromSourcePath", sourcePath];
+                sources = await window.electronAPI.requestDatabaseInteraction(...args);   
+            }
+
+            const totalTracks = sources.length;
+            const panelTitle = sourcePath.split(/[\\/]/).pop();
+            const sourceID = sourcePath.replace(/[\\\/|\:]/g, "");
+            const totalTime = sources.reduce((acc, a) => acc + a.duration, 0);
             const details = `Total Tracks: ${totalTracks}, ${Utilities.formatSecondsToTimestamp(totalTime, true)}`;
 
             const panel = document.createElement("DIV");
             panel.id = sourceID;
             panel.classList.add("panel");
             
+            const panelItems = [];
             for (let i = 0; i < sources.length; i++) {
                 panelItems.push(`
                     <div class="panel-item">
                         <div>${i + 1}</div>
                         <div>${sources[i].title}</div>
                         <div>${sources[i].artist}</div>
-                        <div>album</div>
+                        <div>${sources[i].album ? sources[i].album : ""}</div>
                         <div>${Utilities.formatSecondsToTimestamp(sources[i].duration)}</div>
                     </div>
                 `);
@@ -250,7 +288,7 @@ class UI {
                 <div class="panel-header-top">
                     <div>
                         <img class="panel-icon" src="">
-                        <span class="panel-title">Source: ${title}</span>
+                        <span class="panel-title">Source: ${panelTitle}</span>
                     </div>
                     <div>
                         <span class="panel-details">${details}</span>
@@ -258,7 +296,7 @@ class UI {
                 </div>
                 <div class="panel-header-bottom">
                     <div>#</div>
-                    <div>Track Title</div>
+                    <div>Title</div>
                     <div>Artist</div>
                     <div>Album</div>
                     <div>Duration</div>

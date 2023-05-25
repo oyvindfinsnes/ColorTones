@@ -102,7 +102,7 @@ class Modal {
             // Creating 3 different data structures to complete DB insert (with
             // data dependencies)
             for (const source of sources) {
-                const { filename, artist, title, albumName, img } = source;
+                const { filename, artist, duration, title, albumName, img } = source;
                 
                 artistNames.add(artist);
 
@@ -114,6 +114,7 @@ class Modal {
                 trackData.push({
                     filename: filename,
                     name: title,
+                    duration: duration,
                     albumname: albumName,
                     artistname: artist,
                     sourcepath: sourcePath
@@ -176,6 +177,9 @@ class Modal {
 const registerRendererHandlers = () => {
     ipcMain.handle("requestTemplate", async (e, name) => {
         return await Modal.requestTemplate(name);
+    });
+    ipcMain.handle("requestDatabaseInteraction", async (...args) => {
+        return await Database.handleAction(...args);
     });
     ipcMain.handle("folderSelectSource", async () => {
         return await Modal.AddSource.handleSelect();

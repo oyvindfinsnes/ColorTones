@@ -209,6 +209,10 @@ class AudioPlayer {
         this._generateQueues(true);
     }
 
+    static hasSource(sourcePath) {
+        return this.audioSources.hasOwnProperty(sourcePath);
+    }
+
     static updateAudioSources(sources, sourcePath) {
         if (sources.length > 0) {
             this.audioSources[sourcePath] = sources;
