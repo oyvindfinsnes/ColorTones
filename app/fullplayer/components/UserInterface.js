@@ -286,11 +286,9 @@ class UI {
 
             panel.innerHTML = `
                 <div class="panel-header-top">
+                    <img class="panel-icon" src="../assets/img/default-origin.png">
                     <div>
-                        <img class="panel-icon" src="">
                         <span class="panel-title">Source: ${panelTitle}</span>
-                    </div>
-                    <div>
                         <span class="panel-details">${details}</span>
                     </div>
                 </div>

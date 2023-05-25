@@ -412,18 +412,23 @@ body {
 }
 
 .main-panel .panels .panel .panel-header-top {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
     padding: 5px 10px;
     box-sizing: border-box;
 }
 
 .main-panel .panels .panel .panel-header-top .panel-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 5px;
-    background-color: red;
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+}
+
+.main-panel .panels .panel .panel-header-top div {
+    display: inline-block;
+}
+
+.main-panel .panels .panel .panel-header-top div span {
+    display: block;
 }
 
 .main-panel .panels .panel .panel-header-bottom,
@@ -432,13 +437,14 @@ body {
     grid-template-columns: 1fr 2fr 2fr 2fr 1fr;
     justify-content: space-between;
     gap: 20px;
-    font-size: 12px;
     box-sizing: border-box;
 }
 
 .main-panel .panels .panel .panel-header-bottom {
     position: sticky;
     top: 0;
+    font-size: 14px;
+    font-weight: 500;
     padding: 10px 20px;
     backdrop-filter: blur(10px);
 }
@@ -450,6 +456,7 @@ body {
 .main-panel .panels .panel .panel-content .panel-item {
     height: 60px;
     padding: 20px;
+    font-size: 12px;
     transition: backdrop-filter 0.1s linear;
 }
 
