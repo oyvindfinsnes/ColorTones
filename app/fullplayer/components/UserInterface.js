@@ -282,14 +282,19 @@ class UI {
             
             const panelItems = [];
             for (let i = 0; i < sources.length; i++) {
+                const { title, artist, album, duration, img } = sources[i];
+                
                 panelItems.push(`
                     <div class="panel-item">
                         <div class="panel-button"><img src="../assets/icon/ui/play-white.png" /></div>
-                        <div>${i + 1}</div>
-                        <div>${sources[i].title}</div>
-                        <div>${sources[i].artist}</div>
-                        <div>${sources[i].album ? sources[i].album : ""}</div>
-                        <div>${Utilities.formatSecondsToTimestamp(sources[i].duration)}</div>
+                        <div>
+                            ${i + 1}
+                            <img src="${img ? img : "../assets/img/default-origin.png"}" />
+                        </div>
+                        <div title="${title}">${title}</div>
+                        <div title="${artist}">${artist}</div>
+                        <div title="${album ? album : ""}">${album ? album : ""}</div>
+                        <div>${Utilities.formatSecondsToTimestamp(duration)}</div>
                         <div class="panel-button"><img src="../assets/icon/ui/more.png" /></div>
                     </div>
                 `);

@@ -491,6 +491,7 @@ body {
 .main-panel .panels .panel .panel-header-bottom,
 .main-panel .panels .panel .panel-content .panel-item {
     display: grid;
+    align-items: center;
     justify-content: space-between;
     grid-template-columns: auto 1fr 2fr 2fr 2fr 1fr auto;
     gap: 20px;
@@ -508,7 +509,6 @@ body {
 .main-panel .panels .panel .panel-content .panel-item .panel-button {
     opacity: 0;
     width: 28px;
-    margin-top: -4px; /* Beautiful hack */
 }
 
 .main-panel .panels .panel .panel-content .panel-item .panel-button:hover {
@@ -531,8 +531,8 @@ body {
 
 .main-panel .panels .panel .panel-content .panel-item {
     height: 60px;
-    padding: 20px;
     font-size: 12px;
+    padding: 10px 20px;
     transition: backdrop-filter 0.1s linear;
 }
 
@@ -559,8 +559,15 @@ body {
 
 .main-panel .panels .panel .panel-header-bottom div:nth-child(2),
 .main-panel .panels .panel .panel-content .panel-item div:nth-child(2) {
-    font-size: 14px;
-    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+}
+
+.main-panel .panels .panel .panel-content .panel-item div:nth-child(2) img {
+    width: 40px;
+    border-radius: 5px;
 }
 
 .main-panel .panels .panel .panel-header-bottom div:nth-last-child(2),

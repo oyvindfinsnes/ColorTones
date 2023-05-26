@@ -39,10 +39,10 @@ const createMainWindow = () => {
     mainWindow = new BrowserWindow({
         show: false,
         frame: false,
-        width: 1500,
-        height: 850,
-        minWidth: 700,
-        minHeight: 500,
+        width: 1400,
+        height: 800,
+        minWidth: 800,
+        minHeight: 550,
         backgroundColor: "#121212",
         icon: iconPath,
         webPreferences: { preload: path.join(__dirname, "preload.js") }
