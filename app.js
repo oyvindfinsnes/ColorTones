@@ -1,4 +1,4 @@
-const { app, Menu, Tray, BrowserWindow } = require("electron");
+const { app, Menu, Tray, BrowserWindow, globalShortcut } = require("electron");
 const schedule = require("node-schedule");
 const sqlite3 = require("sqlite3");
 const path = require("path");
@@ -24,6 +24,7 @@ global.sharedState = { mainWindow, resourcesPath, dbPath };
 
 const { registerAppHandlers } = require("./handlers/apphandlers");
 const { registerRendererHandlers } = require("./handlers/rendererhandlers");
+const { registerGlobalAppKeys } = require("./handlers/keyhandlers");
 
 const { Database } = require("./lib/database");
 Database.init(new sqlite3.Database(dbPath));
@@ -62,6 +63,11 @@ const setup = () => {
     
     registerAppHandlers();
     registerRendererHandlers();
+    registerGlobalAppKeys();
+
+    app.on("will-quit", () => {
+        globalShortcut.unregisterAll();
+    });
 
     schedule.scheduleJob("*/15 * * * *", () => {
         console.log("Job working!");

@@ -90,11 +90,20 @@ class UI {
         });
 
         // Playbar
+        window.electronAPI.globalPreviousTrack(() => {
+            UI.Playbar.handleSkipPrevious();
+        });
         UI.btnSkipPrevious.addEventListener("click", () => {
             UI.Playbar.handleSkipPrevious();
         });
+        window.electronAPI.globalPlayPause(() => {
+            UI.Playbar.handlePlaystate();
+        });
         UI.btnPlay.addEventListener("click", () => {
             UI.Playbar.handlePlaystate();
+        });
+        window.electronAPI.globalNextTrack(() => {
+            UI.Playbar.handleSkipNext();
         });
         UI.btnSkipNext.addEventListener("click", () => {
             UI.Playbar.handleSkipNext();
