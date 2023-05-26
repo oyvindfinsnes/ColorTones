@@ -27,6 +27,7 @@ class UI {
 
         this.panels = document.querySelector("#panels");
 
+        this.trackArt = document.querySelector(".track-art img");
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
         this.inpTimeline = document.querySelector("#inpTimeline");
@@ -107,6 +108,7 @@ class UI {
         UI.toggleButtons.forEach(toggle => {
             toggle.addEventListener("click", () => {
                 toggle.classList.toggle("active");
+                UI.Playbar.handleToggleButton(toggle);
             });
         });
         [...document.querySelectorAll(".slider")].forEach(slider => {
@@ -252,12 +254,6 @@ class UI {
                 targetPanel = document.querySelector(`#${linkItem.dataset.targetpanel}`);
             }
 
-            /* if (!AudioPlayer.hasSource(sourcePath)) {
-                AudioPlayer.updateAudioSources(sources, sourcePath);
-            }
-            
-            AudioPlayer.updateCurrentSourcePath(sourcePath); */
-
             [...document.querySelectorAll(".main-panel .panel")].forEach(panel => {
                 panel.classList.remove("active");
                 if (panel.id == targetPanel.id) panel.classList.add("active");
@@ -269,6 +265,8 @@ class UI {
                 const args = ["getDataFromSourcePath", sourcePath];
                 sources = await window.electronAPI.requestDatabaseInteraction(...args);   
             }
+
+            AudioPlayer.updateAudioSources(sources, sourcePath);
 
             const totalTracks = sources.length;
             const panelTitle = sourcePath.split(/[\\/]/).pop();
@@ -282,11 +280,13 @@ class UI {
             
             const panelItems = [];
             for (let i = 0; i < sources.length; i++) {
-                const { title, artist, album, duration, img } = sources[i];
+                const { filename, title, artist, album, duration, img } = sources[i];
                 
                 panelItems.push(`
-                    <div class="panel-item">
-                        <div class="panel-button"><img src="../assets/icon/ui/play-white.png" /></div>
+                    <div class="panel-item" data-filename="${filename}">
+                        <div class="panel-button">
+                            <img class="track-play" src="../assets/icon/ui/play-white.png" />
+                        </div>
                         <div>
                             ${i + 1}
                             <img src="${img ? img : "../assets/img/default-origin.png"}" />
@@ -333,21 +333,31 @@ class UI {
             `;
 
             UI.panels.appendChild(panel);
+            panel.addEventListener("click", e => {
+                const filename = e.target.classList.contains("track-play")
+                    && e.target.parentElement.parentElement.dataset.filename;
+
+                if (filename) {
+                    AudioPlayer.updateCurrentSourcePath(sourcePath);
+                }
+            });
         }
     }
 
     static Playbar = class {
         static handleTrackDetailsChange() {
-            const { title, artist, duration } = AudioPlayer.getCurrentTrackItem();
+            const { title, artist, duration, img } = AudioPlayer.getCurrentTrackItem();
             const elapsed = Utilities.formatSecondsToTimestamp(0);
             const total = Utilities.formatSecondsToTimestamp(duration);
 
             UI.inpTimeline.max = duration;
 
+            UI.trackArt.src = img ? img : "../assets/img/default-origin.png";
             UI.trackTitle.textContent = title;
             UI.trackArtist.textContent = artist;
             UI.timeElapsed.textContent = elapsed;
             UI.timeTotal.textContent = total;
+            document.title = `${artist} - ${title}`;
         }
 
         static handleTimelineUpdate() {
@@ -360,6 +370,14 @@ class UI {
 
             if (AudioPlayer.audio.currentTime == AudioPlayer.audio.duration) {
                 AudioPlayer.skipNext();
+            }
+        }
+
+        static handleToggleButton(toggle) {
+            if (toggle.id == "btnShuffle") {
+                toggle.classList.contains("active")
+                    ? AudioPlayer.setPlaymodeShuffle()
+                    : AudioPlayer.setPlaymodeStandard();
             }
         }
 

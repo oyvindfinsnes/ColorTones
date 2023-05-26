@@ -72,11 +72,16 @@ class AudioPlayer {
     }
 
     static _pickNextTrack() {
-        if (this.currentIndex === 0) {
-            if (this.playMode === this.PLAYMODE_STANDARD) {
-                const nextItem = this.standardQueue.shift();
-                this.trackHistory.unshift(nextItem);
+        if (this.currentIndex == 0) {
+            let nextItem = null;
+
+            if (this.playMode == this.PLAYMODE_SHUFFLE) {
+                nextItem = this.shuffleQueue.shift();
+            } else {
+                nextItem = this.standardQueue.shift();
             }
+
+            this.trackHistory.unshift(nextItem);
         } else {
             this.currentIndex--;
         }
@@ -85,18 +90,19 @@ class AudioPlayer {
     }
 
     static _getTrackPath(trackItem) {
-        return trackItem.sourcepath + "/" + trackItem.filename;
+        return AudioPlayer.currentSourcePath + "/" + trackItem.filename;
     }
 
     static _handlePlaystateFading(operator) {
-        const step = this.volume / 10;
+        const fadeMS = 250;
+        const volumeStep = this.volume / 10;
 
         const fadeOut = () => {
             this.isPlaystateFading = true;
 
-            if (this.audio.volume - step > 0) {
-                this.audio.volume -= step;
-                setTimeout(fadeOut, 10);
+            if (this.audio.volume - volumeStep > 0) {
+                this.audio.volume -= volumeStep;
+                setTimeout(fadeOut, fadeMS / 10);
             } else {
                 this.audio.pause();
                 this.isPlaystateFading = false;
@@ -107,9 +113,9 @@ class AudioPlayer {
             this.audio.play();
             this.isPlaystateFading = true;
 
-            if (this.audio.volume + step < this.volume) {
-                this.audio.volume += step;
-                setTimeout(fadeIn, 10);
+            if (this.audio.volume + volumeStep < this.volume) {
+                this.audio.volume += volumeStep;
+                setTimeout(fadeIn, fadeMS / 10);
             } else {
                 this.isPlaystateFading = false;
             }
@@ -204,13 +210,17 @@ class AudioPlayer {
         }
     }
 
+    static setPlaymodeStandard() {
+        this.playMode = this.PLAYMODE_STANDARD;
+    }
+
+    static setPlaymodeShuffle() {
+        this.playMode = this.PLAYMODE_SHUFFLE;
+    }
+
     static updateCurrentSourcePath(sourcePath) {
         this.currentSourcePath = sourcePath;
         this._generateQueues(true);
-    }
-
-    static hasSource(sourcePath) {
-        return this.audioSources.hasOwnProperty(sourcePath);
     }
 
     static updateAudioSources(sources, sourcePath) {
