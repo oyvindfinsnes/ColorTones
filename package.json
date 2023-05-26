@@ -4,7 +4,10 @@
   "description": "A simple and colorful music player for local files",
   "main": "app.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build-win": "electron-builder --win",
+    "build-linux": "electron-builder --linux",
+    "build-mac": "electron-builder --mac"
   },
   "keywords": [
     "Music",
@@ -13,6 +16,7 @@
   "author": "Zamt3x",
   "license": "MIT",
   "dependencies": {
+    "got": "^11.8.6",
     "music-metadata": "^7.13.0",
     "node-schedule": "^2.1.1",
     "sqlite3": "^5.1.6"
@@ -20,5 +24,27 @@
   "devDependencies": {
     "electron": "^24.4.0",
     "electron-builder": "^24.4.0"
+  },
+  "build": {
+    "appId": "com.colortones.app",
+    "productName": "ColorTones",
+    "artifactName": "ColorTones.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "win": {
+      "icon": "app/assets/icon/app/256x256.ico",
+      "target": "portable"
+    },
+    "linux": {
+      "icon": "app/assets/icon/app/256x256.png",
+      "executableName": "ColorTones",
+      "target": ["AppImage", "snap", "deb", "rpm"]
+    },
+    "mac": {
+      "icon": "app/assets/icon/app/256x256.icns",
+      "target": "dmg"
+    }
   }
 }
