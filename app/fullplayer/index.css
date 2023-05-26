@@ -21,6 +21,11 @@
     src: url("../assets/font/poppins/Bold.woff2") format("woff2");
 }
 
+@keyframes tooltipTransition {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 @keyframes modalTransition {
     from { opacity: 0; transform: scale(1.2); }
     to { opacity: 1; transform: scale(1); }
@@ -74,6 +79,48 @@ body {
 
 .modal, .topbar, .navbar, .main-panel, .playbar {
     box-sizing: border-box;
+}
+
+/* Tooltips ================================================================= */
+/* 
+    Tooltips are specified as class="tooltip xalign-yalign", meaning
+    class="tooltip center-top" would place it centered above the element
+*/
+
+.tooltip {
+    position: absolute;
+    display: none;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.tooltip-trigger {
+    position: relative;
+}
+
+.tooltip-trigger:hover .tooltip {
+    display: inline-block;
+    animation: tooltipTransition 0.1s linear forwards;
+}
+
+.tooltip.center-top {
+    top: -20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tooltip.right-top {
+    top: -20%;
+    right: 10%;
+    transform: translateY(-50%);
+}
+
+.tooltip.nudge-top {
+    top: -50%;
+    transform: translate(-50%, -100%);
 }
 
 /* Modal ==================================================================== */
@@ -419,6 +466,8 @@ body {
 }
 
 .main-panel .panels .panel .panel-header-top {
+    display: flex;
+    align-items: flex-end;
     padding: 5px 10px;
     box-sizing: border-box;
 }
@@ -427,6 +476,7 @@ body {
     display: inline-block;
     width: 120px;
     height: 120px;
+    margin-right: 15px;
     border-radius: 10px;
 }
 
@@ -524,11 +574,16 @@ body {
     position: absolute;
     bottom: 15px;
     left: 15px;
-    width: calc(100% - 30px);
     height: 80px;
+    z-index: 10;
+    border-radius: 10px;
+    width: calc(100% - 30px);
+}
+
+.playbar .bgimg {
+    height: 100%;
     overflow: hidden;
     border-radius: 10px;
-    z-index: 10;
 }
 
 .playbar .bgimg img {
@@ -708,10 +763,14 @@ body {
     margin: 0;
 }
 
-.playbar .controls .extra-buttons .miniplayer-switch {
+.playbar .controls .extra-buttons .queue {
     margin-left: 20px;
 }
 
+.playbar .controls .extra-buttons .queue img {
+    width: 28px;
+}
+
 .playbar .controls .extra-buttons .miniplayer-switch img {
-    width: 24px;
+    width: 22px;
 }
