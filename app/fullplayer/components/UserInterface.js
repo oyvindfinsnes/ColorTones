@@ -48,8 +48,8 @@ class UI {
 
         this.isTimelineSeeking = false;
 
-        UI._setupListeners();
-        UI._init();
+        this._setupListeners();
+        this._init();
     }
 
     static _setupListeners() {

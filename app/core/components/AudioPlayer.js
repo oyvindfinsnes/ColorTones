@@ -26,16 +26,16 @@ class AudioPlayer {
 
         this.audioContext.volume = this.volume;
 
-        AudioPlayer._setupListeners();
+        this._setupListeners();
     }
 
     // Private members =========================================================
 
     static _setupListeners() {
-        AudioPlayer.audioContext.addEventListener("durationchange", () => {
+        this.audioContext.addEventListener("durationchange", () => {
             UI.Playbar.handleTrackDetailsChange();
         });
-        AudioPlayer.audioContext.addEventListener("timeupdate", () => {
+        this.audioContext.addEventListener("timeupdate", () => {
             UI.Playbar.handleTimelineUpdate();
         });
     }
@@ -138,7 +138,7 @@ class AudioPlayer {
     }
 
     static _getTrackPath(trackItem) {
-        return AudioPlayer.currentSourcePath + "/" + trackItem.filename;
+        return this.currentSourcePath + "/" + trackItem.filename;
     }
 
     static _handlePlaystateFading(operator) {
