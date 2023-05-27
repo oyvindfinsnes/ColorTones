@@ -219,13 +219,31 @@ class AudioPlayer {
     }
 
     static updateCurrentSourcePath(sourcePath) {
-        this.currentSourcePath = sourcePath;
-        this._generateQueues(true);
+        if (this.currentSourcePath != sourcePath) {
+            this.currentSourcePath = sourcePath;
+            this._generateQueues(true);
+        }
     }
 
     static updateAudioSources(sources, sourcePath) {
         if (sources.length > 0) {
             this.audioSources[sourcePath] = sources;
+        }
+    }
+
+    static async storeSourcesFromSourcePath(sourcePath, forceFetch = false) {
+        if (forceFetch || !this.audioSources.hasOwnProperty(sourcePath)) {
+            const args = ["getDataFromSourcePath", sourcePath];
+            const sources = await window.electronAPI.requestDatabaseInteraction(...args);
+            this.updateAudioSources(sources, sourcePath);
+        }
+    }
+
+    static getSourcePathSources(sourcePath) {
+        if (this.audioSources.hasOwnProperty(sourcePath)) {
+            return this.audioSources[sourcePath];
+        } else {
+            return null;
         }
     }
 };

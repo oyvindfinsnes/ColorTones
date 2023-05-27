@@ -91,6 +91,66 @@ class Utilities {
             
             container.classList.add("inactive");
         }
+
+        static applySoundbarsAnimation() {
+            /* @keyframes barVariation1 {
+                0% { transform: scaleY(20%) }
+                50% { transform: scaleY(90%) }
+                100% { transform: scaleY(20%) }
+            }
+    
+            @keyframes barVariation2 {
+                0% { transform: scaleY(30%) }
+                50% { transform: scaleY(70%) }
+                100% { transform: scaleY(30%) }
+            }
+    
+            @keyframes barVariation3 {
+                0% { transform: scaleY(10%) }
+                50% { transform: scaleY(60%) }
+                100% { transform: scaleY(10%) }
+            }
+    
+            .waveform {
+                --bar-width: 5px;
+                --gap-width: 3px;
+                width: calc(var(--bar-width) * 4 + var(--gap-width) * 3);
+                height: 20px;
+            }
+    
+            .gap,
+            .wave {
+                display: inline-block;
+            }
+    
+            .gap {
+                width: var(--gap-width);
+            }
+    
+            .wave {
+                width: var(--bar-width);
+                height: 100%;
+                transform-origin: 50% 100%;
+                
+                background-color: red;
+            }
+    
+            .wave:nth-child(1) {
+                animation: barVariation2 0.9s linear alternate infinite;
+            }
+    
+            .wave:nth-child(3) {
+                animation: barVariation3 1.2s linear alternate infinite;
+            }
+    
+            .wave:nth-child(5) {
+                animation: barVariation2 1.1s linear alternate infinite;
+            }
+    
+            .wave:nth-child(7) {
+                animation: barVariation3 1.4s linear alternate infinite;
+            } */
+        }
     }
 
     /* 

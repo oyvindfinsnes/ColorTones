@@ -7,6 +7,8 @@ class UI {
             highlight: "#d72227"
         };
 
+        this.customDoubleClickData = { timer: 0, delay: 200, prevent: false };
+
         this.modal = document.querySelector(".modal");
 
         this.profile = document.querySelector("#profile");
@@ -235,19 +237,38 @@ class UI {
             sourceItem.dataset.targetpanel = panelID;
             sourceItem.dataset.sourcepath = sourcePath;
             sourceItem.addEventListener("click", () => {
-                UI.Navbar.handleLinkClicked(sourceItem);
+                UI.customDoubleClickData.timer = setTimeout(() => {
+                    if (!UI.customDoubleClickData.prevent) {
+                        UI.Navbar.handleLinkClicked("click", sourceItem);
+                    }
+                    UI.customDoubleClickData.prevent = false;
+                }, UI.customDoubleClickData.delay);
+            });
+            sourceItem.addEventListener("dblclick", () => {
+                clearTimeout(UI.customDoubleClickData.timer);
+                UI.customDoubleClickData.prevent = true;
+                UI.Navbar.handleLinkClicked("dblclick", sourceItem);
             });
             
             UI.sourcesItems.appendChild(sourceItem);
         }
 
-        static handleLinkClicked(targetLinkItem) {
-            [...document.querySelectorAll("[data-targetpanel]")].forEach(linkItem => {
+        static async handleLinkClicked(evtType, targetLinkItem) {
+            [...document.querySelectorAll("[data-targetpanel]")].forEach(async linkItem => {
                 linkItem.classList.remove("active");
-
+                
                 if (linkItem == targetLinkItem) {
                     linkItem.classList.add("active");
-                    UI.MainPanel.handleSwitchActivePanel(linkItem);
+                    
+                    if (evtType == "click") {
+                        UI.MainPanel.handleSwitchActivePanel(linkItem);
+                    } else if (evtType == "dblclick") {
+                        const sourcePath = linkItem.dataset.sourcepath;
+                        
+                        await AudioPlayer.storeSourcesFromSourcePath(sourcePath);
+                        AudioPlayer.updateCurrentSourcePath(sourcePath);
+                        UI.Playbar.handlePlaystate();
+                    }
                 }
             });
         }
@@ -263,6 +284,8 @@ class UI {
                 targetPanel = document.querySelector(`#${linkItem.dataset.targetpanel}`);
             }
 
+            AudioPlayer.updateCurrentSourcePath(sourcePath);
+
             [...document.querySelectorAll(".main-panel .panel")].forEach(panel => {
                 panel.classList.remove("active");
                 if (panel.id == targetPanel.id) panel.classList.add("active");
@@ -271,11 +294,9 @@ class UI {
 
         static async generatePanel(sourcePath, sources = null) {
             if (sources == null) {
-                const args = ["getDataFromSourcePath", sourcePath];
-                sources = await window.electronAPI.requestDatabaseInteraction(...args);   
+                await AudioPlayer.storeSourcesFromSourcePath(sourcePath);
+                sources = AudioPlayer.getSourcePathSources(sourcePath);
             }
-
-            AudioPlayer.updateAudioSources(sources, sourcePath);
 
             const totalTracks = sources.length;
             const panelTitle = sourcePath.split(/[\\/]/).pop();
@@ -346,9 +367,9 @@ class UI {
                 const filename = e.target.classList.contains("track-play")
                     && e.target.parentElement.parentElement.dataset.filename;
 
-                if (filename) {
+                /* if (filename) {
                     AudioPlayer.updateCurrentSourcePath(sourcePath);
-                }
+                } */
             });
         }
     }
