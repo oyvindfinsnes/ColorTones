@@ -137,6 +137,9 @@ class UI {
         for (const sourceItem of sourceItems) {
             UI.Navbar.addSource(sourceItem.path);
         }
+
+        UI.inpVolume.value = AudioPlayer.volume * 100;
+        UI.inpVolume.dispatchEvent(new Event("input"));
     }
 
     static setAppColors() {
@@ -391,14 +394,14 @@ class UI {
         }
 
         static handleTimelineUpdate() {
+            const { currentTime, duration } = AudioPlayer.audioContext;
+
             if (!UI.isTimelineSeeking) {
-                const elapsed = AudioPlayer.audio.currentTime;
-                
-                UI.inpTimeline.value = elapsed;
+                UI.inpTimeline.value = currentTime;
                 UI.inpTimeline.dispatchEvent(new Event("input"));
             }
 
-            if (AudioPlayer.audio.currentTime == AudioPlayer.audio.duration) {
+            if (currentTime == duration) {
                 AudioPlayer.skipNext();
             }
         }
@@ -429,7 +432,7 @@ class UI {
 
         static handleTimelineChange() {
             const pickedTime = UI.inpTimeline.value;
-            AudioPlayer.audio.currentTime = pickedTime;
+            AudioPlayer.audioContext.currentTime = pickedTime;
             UI.isTimelineSeeking = false;
         }
 
@@ -437,7 +440,7 @@ class UI {
             const slider = e.currentTarget;
 
             if (slider.id == UI.inpVolume.id) {
-                AudioPlayer.setVolume(document.querySelector("#inpVolume").value);
+                AudioPlayer.setVolume(UI.inpVolume.value);
             }
 
             if (slider.id == UI.inpTimeline.id) {
