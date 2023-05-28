@@ -20,6 +20,14 @@ class Utilities {
         return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
+    static pathToHTMLSafeString(sourcePath) {
+        return sourcePath.replace(/[\\\/|\:]/g, "");
+    }
+
+    static basename(path) {
+        return path.split(/[\\/]/).pop();
+    }
+
     static InterfaceEffects = class {
         static _getRandomFloat(min, max) {
             return (Math.random() * (max - min) + min);
@@ -58,16 +66,29 @@ class Utilities {
                 const xAxis = Utilities.InterfaceEffects._generateCubicBezier();
                 const startX = Math.floor(Utilities.InterfaceEffects._getRandomFloat(10, 90));
                 const startY = Math.floor(Utilities.InterfaceEffects._getRandomFloat(10, 90));
-                sheetContent += `.bg-container>:nth-child(${i + 1}){transform:translate(${startX}vw,${startY}vh);animation:xAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${xAxis.x1},${xAxis.y1},${xAxis.x2},${xAxis.y2});}`;
+                sheetContent += `.bg-container>:nth-child(${i + 1}){
+                    transform:translate(${startX}vw,${startY}vh);
+                    animation:xAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${xAxis.x1},${xAxis.y1},${xAxis.x2},${xAxis.y2});
+                }`;
                 
                 const yAxis = Utilities.InterfaceEffects._generateCubicBezier();
                 const color = colors[Math.floor(Utilities.InterfaceEffects._getRandomFloat(0, colors.length))];
-                sheetContent += `.bg-container>:nth-child(${i + 1})::after{width:30px;box-shadow:0 0 ${softness}px ${size}px ${color};animation:yAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${yAxis.x1},${yAxis.y1},${yAxis.x2},${yAxis.y2});}`;
+                sheetContent += `.bg-container>:nth-child(${i + 1})::after{
+                    width:30px;
+                    box-shadow:0 0 ${softness}px ${size}px ${color};
+                    animation:yAxis${i + 1} ${animationDurationS}s infinite cubic-bezier(${yAxis.x1},${yAxis.y1},${yAxis.x2},${yAxis.y2});
+                }`;
         
                 const moveToX = Math.floor(Utilities.InterfaceEffects._getRandomFloat(10, 90));
                 const moveToY = Math.floor(Utilities.InterfaceEffects._getRandomFloat(10, 90));
-                sheetContent += `@keyframes xAxis${i + 1} {50%{transform:translateX(${moveToX}vw);100%{transform:translateX(${startX}vw)}}}`;
-                sheetContent += `@keyframes yAxis${i + 1} {50%{transform:translateY(${moveToY}vh);100%{transform:translateX(${startY}vh)}}}`;
+                sheetContent += `@keyframes xAxis${i + 1}{
+                    50%{transform:translateX(${moveToX}vw);
+                    100%{transform:translateX(${startX}vw)}
+                }}`;
+                sheetContent += `@keyframes yAxis${i + 1}{
+                    50%{transform:translateY(${moveToY}vh);
+                    100%{transform:translateX(${startY}vh)}
+                }}`;
             }
         
             sheet.appendChild(document.createTextNode(sheetContent));
@@ -92,64 +113,63 @@ class Utilities {
             container.classList.add("inactive");
         }
 
-        static applySoundbarsAnimation() {
-            /* @keyframes barVariation1 {
-                0% { transform: scaleY(20%) }
-                50% { transform: scaleY(90%) }
-                100% { transform: scaleY(20%) }
-            }
+        static applySoundbarsAnimationStyles() {
+            let sheetContent = "";
     
-            @keyframes barVariation2 {
-                0% { transform: scaleY(30%) }
-                50% { transform: scaleY(70%) }
-                100% { transform: scaleY(30%) }
-            }
-    
-            @keyframes barVariation3 {
-                0% { transform: scaleY(10%) }
-                50% { transform: scaleY(60%) }
-                100% { transform: scaleY(10%) }
-            }
-    
-            .waveform {
-                --bar-width: 5px;
-                --gap-width: 3px;
-                width: calc(var(--bar-width) * 4 + var(--gap-width) * 3);
-                height: 20px;
-            }
-    
-            .gap,
-            .wave {
-                display: inline-block;
-            }
-    
-            .gap {
-                width: var(--gap-width);
-            }
-    
-            .wave {
-                width: var(--bar-width);
-                height: 100%;
-                transform-origin: 50% 100%;
-                
-                background-color: red;
-            }
-    
-            .wave:nth-child(1) {
-                animation: barVariation2 0.9s linear alternate infinite;
-            }
-    
-            .wave:nth-child(3) {
-                animation: barVariation3 1.2s linear alternate infinite;
-            }
-    
-            .wave:nth-child(5) {
-                animation: barVariation2 1.1s linear alternate infinite;
-            }
-    
-            .wave:nth-child(7) {
-                animation: barVariation3 1.4s linear alternate infinite;
-            } */
+            const sheet = document.createElement("STYLE");
+            sheet.setAttribute("id", "#soundbarsAnimation");
+
+            const barHeight = 18;
+            const barWidth = 3;
+            const totalBars = 4;
+            const gapWidth = 2;
+            const totalGaps = 3;
+            const totalWidth = (barWidth * totalBars) + (gapWidth * totalGaps);
+            sheetContent = `
+                @keyframes barVariation1{
+                    0%{transform:scaleY(20%)}
+                    90%{transform:scaleY(100%)}
+                    100%{transform:scaleY(20%)}
+                }
+                @keyframes barVariation2{
+                    0%{transform:scaleY(30%)}
+                    90%{transform:scaleY(80%)}
+                    100%{transform:scaleY(30%)}
+                }
+                @keyframes barVariation3{
+                    0%{transform:scaleY(10%)}
+                    90%{transform:scaleY(60%)}
+                    100%{transform:scaleY(10%)}
+                }
+                .soundbars,.soundbars .bar,.soundbars .gap{display:inline-block;}
+                .soundbars{width:${totalWidth}px;height:${barHeight}px;}
+                .soundbars .gap{width:${gapWidth}px;}
+                .soundbars .bar{width:${barWidth}px;height:100%;transform-origin:50% 100%;}
+                .soundbars .bar:nth-child(1){
+                    animation:barVariation2 0.8s linear infinite;
+                    animation-delay: 0.5s;
+                }
+                .soundbars .bar:nth-child(3){
+                    animation:barVariation3 0.7s linear infinite;
+                }
+                .soundbars .bar:nth-child(5){
+                    animation:barVariation1 0.8s linear infinite;
+                }
+                .soundbars .bar:nth-child(7){
+                    animation:barVariation2 1s linear infinite;
+                }
+            `;
+
+            sheet.appendChild(document.createTextNode(sheetContent));
+            document.head.appendChild(sheet);
+        }
+
+        static applySoundbarsAnimationElement(parent, prepend = false) {
+            const soundbars = document.createElement("DIV");
+            soundbars.classList.add("soundbars");
+            soundbars.innerHTML = `<div class="bar"></div><div class="gap"></div><div class="bar"></div><div class="gap"></div><div class="bar"></div><div class="gap"></div><div class="bar"></div>`;
+
+            prepend ? parent.prepend(soundbars) : parent.appendChild(soundbars);
         }
     }
 

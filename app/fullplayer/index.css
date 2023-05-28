@@ -21,7 +21,7 @@
     src: url("../assets/font/poppins/Bold.woff2") format("woff2");
 }
 
-@keyframes tooltipTransition {
+@keyframes fadeInTransition {
     from { opacity: 0; }
     to { opacity: 1; }
 }
@@ -103,7 +103,7 @@ body {
 
 .tooltip-trigger:hover .tooltip {
     display: inline-block;
-    animation: tooltipTransition 0.1s linear forwards;
+    animation: fadeInTransition 0.1s linear forwards;
 }
 
 .tooltip.center-top {
@@ -399,15 +399,35 @@ body {
 .navbar .playlists .playlists-items .playlist {
     cursor: pointer;
     display: block;
+    position: relative;
     width: 100%;
     font-size: 14px;
     font-weight: 700;
     border-radius: 5px;
     box-sizing: border-box;
-    padding: 5px 5px 5px 20px;
+    padding: 5px 5px 5px 31px;
     color: var(--secondary-text-color);
     transition: backdrop-filter 0.1s linear, color 0.1s linear;
 }
+
+.navbar .sources .sources-items .source .soundbars,
+.navbar .playlists .playlists-items .playlist .soundbars {
+    position: absolute;
+    left: 4px;
+}
+
+.navbar .sources .sources-items .source .soundbars .bar,
+.navbar .playlists .playlists-items .playlist .soundbars .bar {
+    animation-play-state: running;
+    transition: background 0.1s linear;
+    background-color: var(--secondary-text-color);
+}
+
+.navbar .sources .sources-items .source .soundbars .bar.paused,
+.navbar .playlists .playlists-items .playlist .soundbars .bar.paused {
+    animation-play-state: paused;
+}
+
 
 .navbar .playlists .playlists-items .playlist:last-child {
     margin-bottom: 105px;
@@ -422,6 +442,11 @@ body {
 .navbar .sources .sources-items .source.active,
 .navbar .playlists .playlists-items .playlist.active {
     color: var(--highlight-color);
+}
+
+.navbar .sources .sources-items .source.active > .soundbars .bar,
+.navbar .playlists .playlists-items .playlist.active > .soundbars .bar {
+    background-color: var(--highlight-color);
 }
 
 /* Main Panel =============================================================== */
@@ -444,6 +469,7 @@ body {
     overflow-y: auto;
     box-sizing: border-box;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    animation: fadeInTransition 0.8s ease forwards;
 }
 
 .main-panel .panels .panel::-webkit-scrollbar {
@@ -498,6 +524,10 @@ body {
     box-sizing: border-box;
 }
 
+.main-panel .panels .panel .panel-content .panel-item {
+    content-visibility: auto; /* Performance gains for our large lists */
+}
+
 .main-panel .panels .panel .panel-header-bottom img {
     width: 20px;
     margin-right: 5px;
@@ -507,8 +537,12 @@ body {
 
 .main-panel .panels .panel .panel-header-bottom .panel-button,
 .main-panel .panels .panel .panel-content .panel-item .panel-button {
-    opacity: 0;
     width: 28px;
+}
+
+.main-panel .panels .panel .panel-content .panel-item .panel-button {
+    opacity: 0;
+    transition: opacity 0.1s linear;
 }
 
 .main-panel .panels .panel .panel-content .panel-item .panel-button:hover {
@@ -531,14 +565,21 @@ body {
 
 .main-panel .panels .panel .panel-content .panel-item {
     height: 60px;
+    margin: 0 10px;
     font-size: 12px;
     padding: 10px 20px;
-    transition: backdrop-filter 0.1s linear;
+    border-radius: 5px;
+    width: calc(100% - 20px);
+    transition: background 0.1s linear, box-shadow 0.1s linear;
 }
 
 .main-panel .panels .panel .panel-content .panel-item:hover {
-    backdrop-filter: contrast(85%);
+    background-color: rgba(0, 0, 0, 0.2);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.main-panel .panels .panel .panel-content .panel-item.active {
+    color: var(--highlight-color);
 }
 
 .main-panel .panels .panel .panel-content .panel-item:hover > .panel-button {

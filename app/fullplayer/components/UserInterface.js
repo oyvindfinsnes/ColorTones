@@ -49,7 +49,7 @@ class UI {
         this.isTimelineSeeking = false;
 
         this._setupListeners();
-        this._init();
+        this._setup();
     }
 
     static _setupListeners() {
@@ -88,7 +88,7 @@ class UI {
             UI.Modal.handleOpen("newPlaylistModal");
         });
         [...document.querySelectorAll(".general .general-item")].forEach(item => {
-            item.addEventListener("click", () => UI.Navbar.handleLinkClicked(item));
+            item.addEventListener("click", () => UI.Navbar.addClickListeners(item));
         });
 
         // Playbar
@@ -129,9 +129,13 @@ class UI {
         });
     }
 
-    static async _init() {
+    static async _setup() {
         UI.setAppColors();
-        UI.Background.activateEffects();
+        
+        const args = [UI.COLORS.accent1, UI.COLORS.accent2];
+        Utilities.InterfaceEffects.applyBackgroundAnimation(...args);
+
+        Utilities.InterfaceEffects.applySoundbarsAnimationStyles();
         
         const sourceItems = await window.electronAPI.requestDatabaseInteraction("getSourceItems");
         for (const sourceItem of sourceItems) {
@@ -218,42 +222,39 @@ class UI {
         }
     }
 
-    static Background = class {
-        static activateEffects() {
-            const args = [UI.COLORS.accent1, UI.COLORS.accent2];
-            Utilities.InterfaceEffects.applyBackgroundAnimation(...args);
-        }
-    
-        static deactivateEffects() {
-            Utilities.InterfaceEffects.removeBackgroundAnimation();
-        }
-    }
-
     static Navbar = class {
         static addSource(sourcePath) {
             const sourceItem = document.createElement("SPAN");
-            const name = sourcePath.split(/[\\/]/).pop();
-            const panelID = sourcePath.replace(/[\\\/|\:]/g, "");
+            const name = Utilities.basename(sourcePath);
+            const panelID = Utilities.pathToHTMLSafeString(sourcePath);
 
             sourceItem.textContent = name;
             sourceItem.classList.add("source");
             sourceItem.dataset.targetpanel = panelID;
             sourceItem.dataset.sourcepath = sourcePath;
-            sourceItem.addEventListener("click", () => {
-                UI.customDoubleClickData.timer = setTimeout(() => {
-                    if (!UI.customDoubleClickData.prevent) {
-                        UI.Navbar.handleLinkClicked("click", sourceItem);
-                    }
-                    UI.customDoubleClickData.prevent = false;
-                }, UI.customDoubleClickData.delay);
-            });
-            sourceItem.addEventListener("dblclick", () => {
-                clearTimeout(UI.customDoubleClickData.timer);
-                UI.customDoubleClickData.prevent = true;
-                UI.Navbar.handleLinkClicked("dblclick", sourceItem);
-            });
-            
+            UI.Navbar.addClickListeners(sourceItem);
+
             UI.sourcesItems.appendChild(sourceItem);
+        }
+
+        static addClickListeners(item) {
+            if (item.classList.contains("general-item")) {
+                UI.Navbar.handleLinkClicked("click", item);
+            } else {
+                item.addEventListener("click", () => {
+                    UI.customDoubleClickData.timer = setTimeout(() => {
+                        if (!UI.customDoubleClickData.prevent) {
+                            UI.Navbar.handleLinkClicked("click", item);
+                        }
+                        UI.customDoubleClickData.prevent = false;
+                    }, UI.customDoubleClickData.delay);
+                });
+                item.addEventListener("dblclick", () => {
+                    clearTimeout(UI.customDoubleClickData.timer);
+                    UI.customDoubleClickData.prevent = true;
+                    UI.Navbar.handleLinkClicked("dblclick", item);
+                });
+            }
         }
 
         static async handleLinkClicked(evtType, targetLinkItem) {
@@ -261,16 +262,20 @@ class UI {
                 linkItem.classList.remove("active");
                 
                 if (linkItem == targetLinkItem) {
-                    linkItem.classList.add("active");
-                    
-                    if (evtType == "click") {
+                    if (targetLinkItem.classList.contains("general-item")) {
+                        linkItem.classList.add("active");
                         UI.MainPanel.handleSwitchActivePanel(linkItem);
-                    } else if (evtType == "dblclick") {
-                        const sourcePath = linkItem.dataset.sourcepath;
-                        
-                        await AudioPlayer.storeSourcesFromSourcePath(sourcePath);
-                        AudioPlayer.updateCurrentSourcePath(sourcePath);
-                        UI.Playbar.handlePlaystate();
+                    } else {
+                        if (evtType == "click") {
+                            linkItem.classList.add("active");
+                            UI.MainPanel.handleSwitchActivePanel(linkItem);
+                        } else if (evtType == "dblclick") {
+                            const sourcePath = linkItem.dataset.sourcepath;
+                            
+                            await AudioPlayer.storeSourcesFromSourcePath(sourcePath);
+                            AudioPlayer.updateCurrentSourcePath(sourcePath);
+                            UI.Playbar.handlePlaystate();
+                        }
                     }
                 }
             });
@@ -287,7 +292,9 @@ class UI {
                 targetPanel = document.querySelector(`#${linkItem.dataset.targetpanel}`);
             }
 
-            AudioPlayer.updateCurrentSourcePath(sourcePath);
+            if (!linkItem.classList.contains("general-item")) {
+                AudioPlayer.updateCurrentSourcePath(sourcePath);
+            }
 
             [...document.querySelectorAll(".main-panel .panel")].forEach(panel => {
                 panel.classList.remove("active");
@@ -302,8 +309,8 @@ class UI {
             }
 
             const totalTracks = sources.length;
-            const panelTitle = sourcePath.split(/[\\/]/).pop();
-            const sourceID = sourcePath.replace(/[\\\/|\:]/g, "");
+            const panelTitle = Utilities.basename(sourcePath);
+            const sourceID = Utilities.pathToHTMLSafeString(sourcePath);
             const totalTime = sources.reduce((acc, a) => acc + a.duration, 0);
             const details = `Total Tracks: ${totalTracks}, ${Utilities.formatSecondsToTimestamp(totalTime, true)}`;
 
@@ -424,6 +431,17 @@ class UI {
             const btn = UI.btnPlay.firstElementChild;
             const { playsrc, pausesrc } = btn.dataset;
             btn.src = isPaused ? playsrc : pausesrc;
+
+            const panelID = Utilities.pathToHTMLSafeString(AudioPlayer.currentSourcePath);
+            const activeOrigin = document.querySelector(`[data-targetpanel="${panelID}"]`);
+            
+            if (activeOrigin && !activeOrigin.querySelector(".soundbars")) {
+                Utilities.InterfaceEffects.applySoundbarsAnimationElement(activeOrigin);
+            }
+
+            [...activeOrigin.querySelectorAll(".bar")].forEach(bar => {
+                isPaused ? bar.classList.add("paused") : bar.classList.remove("paused");
+            });
         }
 
         static handleSkipNext() {
