@@ -174,7 +174,7 @@ class Utilities {
     }
 
     /* 
-        Class derived from //https://github.com/angel-rs/css-color-filter-generator
+        Class gotten from //https://github.com/angel-rs/css-color-filter-generator
         A few integration changes have been made to the original code
     */
     static CSSFilterGenerator = class {
@@ -199,6 +199,83 @@ class Utilities {
             }
         
             return bestResult.filterRaw;
+        }
+    }
+
+    static AudioNormalizer = class {
+        /*
+            Function gotten from https://github.com/est31/js-audio-normalizer
+            which partially implements the ReplayGain algorithm, a way to
+            measure the perceived loudness of audio data (normalization)
+        */
+        static _getNormalizationGain = async (fullPath, audioCtx) => {
+            return new Promise(normalizationGainResolve => {
+                fetch(fullPath).then(response => {
+                    return response.arrayBuffer();
+                }).then(buffer => {
+                    return audioCtx.decodeAudioData(buffer);
+                }).then(audioDataBuffer => {
+                    const decodedBuffer = audioDataBuffer.getChannelData(0);
+                    const sliceLen = Math.floor(audioDataBuffer.sampleRate * 0.05);
+                    const averages = [];
+                    let sum = 0.0;
+
+                    for (const [i, decodedData] of decodedBuffer.entries()) {
+                        sum += Math.pow(decodedData, 2);
+
+                        if (i % sliceLen === 0) {
+                            sum = Math.sqrt(sum / sliceLen);
+                            averages.push(sum);
+                            sum = 0;
+                        }
+                    }
+
+                    averages.sort((a, b) => a - b);
+                    const avg = averages[Math.floor(averages.length * 0.95)];
+
+                    normalizationGainResolve((1.0 / avg) / 10.0);
+                });
+            });
+        }
+
+        // The normalized gains are computed in the renderer to avoid having to
+        // use non-standard NodeJS implementations of the Web Audio API
+        // (less dependencies yay)
+        static getNormalizedGainsFromSources = (sources, sourcePath) => {
+            return new Promise(normalizedGainsResolve => {
+                const normalizedGains = {};
+                let activeTasks = 0;
+                let finishedTasks = 0;
+                const startSize = sources.length;
+                const audioCtx = new AudioContext();
+                const MAX_CONCURRENT = Math.floor(window.navigator.hardwareConcurrency / 4);
+
+                const initiateNewNormalizedGain = () => {
+                    activeTasks++;
+                    const source = sources.pop();
+                    const fullPath = sourcePath + "/" + source.filename;
+                    
+                    const args = [fullPath, audioCtx];
+                    Utilities.AudioNormalizer._getNormalizationGain(...args).then(gain => {
+                        activeTasks--;
+                        finishedTasks++;
+                        normalizedGains[source.filename] = gain;
+
+                        if (finishedTasks === startSize) {
+                            normalizedGainsResolve(normalizedGains);
+                        }
+                        
+                        if (sources.length > 0) {
+                            initiateNewNormalizedGain();
+                        }
+                    });
+                }
+
+                const initialTasks = Math.min(sources.length, MAX_CONCURRENT);
+                for (let i = 0; i < initialTasks; i++) {
+                    initiateNewNormalizedGain();
+                }
+            });
         }
     }
 }

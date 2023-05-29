@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     globalPreviousTrack: callback => ipcRenderer.on("globalPreviousTrack", callback),
     globalPlayPause: callback => ipcRenderer.on("globalPlayPause", callback),
     globalNextTrack: callback => ipcRenderer.on("globalNextTrack", callback),
+    handleRequestNormalizedGains: callback => ipcRenderer.on("handleRequestNormalizedGains", callback),
+    provideNormalizedGains: (...args) => ipcRenderer.send("provideNormalizedGains", ...args),
     requestTemplate: (...args) => ipcRenderer.invoke("requestTemplate", ...args),
     requestDatabaseInteraction: (...args) => ipcRenderer.invoke("requestDatabaseInteraction", ...args),
     folderSelectSource: () => ipcRenderer.invoke("folderSelectSource"),

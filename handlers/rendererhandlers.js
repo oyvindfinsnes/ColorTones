@@ -94,7 +94,7 @@ class Modal {
             return sources;
         }
 
-        static _putTracksDataFromSourceIntoDB = async (sources, sourcePath) => {
+        static _putTracksDataFromSourceIntoDB = async (sources, normalizedGains, sourcePath) => {
             const artistNames = new Set();
             const albumData = {};
             const trackData = [];
@@ -115,6 +115,7 @@ class Modal {
                     filename: filename,
                     name: title,
                     duration: duration,
+                    normalizedgain: normalizedGains[filename],
                     albumname: albumName,
                     artistname: artist,
                     sourcepath: sourcePath
@@ -159,10 +160,29 @@ class Modal {
                 }
             }
 
-            new Promise(async (res, rej) => {
-                const data = await Modal.AddSource._fetchTrackDataFromSource(sources);
-                Modal.AddSource._putTracksDataFromSourceIntoDB(data, sourcePath);
-                res(true);
+            const initiateRequestNormalizedGains = () => {
+                return new Promise(resolve => {
+                    ipcMain.on("provideNormalizedGains", (e, normalizedGains) => {
+                        resolve(normalizedGains);
+                    });
+
+                    const args = ["handleRequestNormalizedGains", sources, sourcePath];
+                    global.sharedState.mainWindow.webContents.send(...args);
+                });
+            }
+
+            // Inline promise to make sure the unprocessed sources are immediately
+            // returned, then providing the full data later when it has processed
+            new Promise(async resolve => {
+                const results = await Promise.all([
+                    Modal.AddSource._fetchTrackDataFromSource(sources),
+                    initiateRequestNormalizedGains()
+                ]);
+
+                const args = [results[0], results[1], sourcePath];
+                Modal.AddSource._putTracksDataFromSourceIntoDB(...args);
+                
+                resolve(true);
             });
             
             return { sources, sourcePath };

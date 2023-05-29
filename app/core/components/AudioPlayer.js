@@ -38,6 +38,11 @@ class AudioPlayer {
         this.audioContext.addEventListener("timeupdate", () => {
             UI.Playbar.handleTimelineUpdate();
         });
+        window.electronAPI.handleRequestNormalizedGains(async (e, sources, sourcePath) => {
+            const args = [sources, sourcePath];
+            const normalizedGains = await Utilities.AudioNormalizer.getNormalizedGainsFromSources(...args);
+            window.electronAPI.provideNormalizedGains(normalizedGains);
+        });
     }
 
     static _beforeExit() {
@@ -50,11 +55,11 @@ class AudioPlayer {
         }) + 1;
     }
 
-    static _generateQueues(opts) {
-        const hasStandardQueueIndex = opts && opts.standardQueueIndex != undefined;
-        const skipStandardQueue = opts && opts.skipStandardQueue != undefined && opts.skipStandardQueue;
-        const skipShuffleQueue = opts && opts.skipShuffleQueue != undefined && opts.skipShuffleQueue;
-        const regenerate = opts && opts.regenerate != undefined && opts.regenerate;
+    static _generateQueues(opts = {}) {
+        const hasStandardQueueIndex = opts.hasOwnProperty("standardQueueIndex");
+        const skipStandardQueue = opts.hasOwnProperty("skipStandardQueue") && opts.skipStandardQueue;
+        const skipShuffleQueue = opts.hasOwnProperty("skipShuffleQueue") && opts.skipShuffleQueue;
+        const regenerate = opts.hasOwnProperty("regenerate") && opts.regenerate;
 
         const shuffleQueue = [];
         const standardQueue = [];
