@@ -401,7 +401,7 @@ class UI {
         }
 
         static handleTimelineUpdate() {
-            const { currentTime, duration } = AudioPlayer.audioContext;
+            const { currentTime, duration } = AudioPlayer.audio;
 
             if (!UI.isTimelineSeeking) {
                 UI.inpTimeline.value = currentTime;
@@ -450,7 +450,7 @@ class UI {
 
         static handleTimelineChange() {
             const pickedTime = UI.inpTimeline.value;
-            AudioPlayer.audioContext.currentTime = pickedTime;
+            AudioPlayer.audio.currentTime = pickedTime;
             UI.isTimelineSeeking = false;
         }
 

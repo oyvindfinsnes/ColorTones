@@ -4,7 +4,10 @@ class AudioPlayer {
         this.PLAYMODE_SHUFFLE = "shuffle";
         this.playMode = this.PLAYMODE_STANDARD;
         
-        this.audioContext = new Audio();
+        this.audio = new Audio();
+        this.audioCtx = new AudioContext();
+        this.audioSource = this.audioCtx.createMediaElementSource(this.audio);
+        this.audioGainNode = this.audioCtx.createGain();
         this.volume = 0.1;
         this.currentIndex = 0;
         
@@ -24,7 +27,8 @@ class AudioPlayer {
         this.isPlaystateFading = false;
         this.regenerateStandardQueueOnNextPlay = false;
 
-        this.audioContext.volume = this.volume;
+        this.audio.volume = this.volume;
+        this.audioGainNode.gain.value = 1.0;
 
         this._setupListeners();
     }
@@ -32,10 +36,12 @@ class AudioPlayer {
     // Private members =========================================================
 
     static _setupListeners() {
-        this.audioContext.addEventListener("durationchange", () => {
+        this.audioSource.connect(this.audioGainNode);
+		this.audioGainNode.connect(this.audioCtx.destination);
+        this.audio.addEventListener("durationchange", () => {
             UI.Playbar.handleTrackDetailsChange();
         });
-        this.audioContext.addEventListener("timeupdate", () => {
+        this.audio.addEventListener("timeupdate", () => {
             UI.Playbar.handleTimelineUpdate();
         });
     }
@@ -106,7 +112,11 @@ class AudioPlayer {
     static _pickPreviousTrack() {
         if (this.currentIndex < this.trackHistory.length - 1) {
             this.currentIndex++;
-            return this._getTrackPath(this.trackHistory[this.currentIndex]);
+            
+            return {
+                gain: this.trackHistory[this.currentIndex].normalizedgain,
+                src: this._getTrackPath(this.trackHistory[this.currentIndex])
+            };
         }
 
         return false;
@@ -134,7 +144,10 @@ class AudioPlayer {
             this.currentIndex--;
         }
 
-        return this._getTrackPath(this.trackHistory[this.currentIndex]);
+        return {
+            gain: this.trackHistory[this.currentIndex].normalizedgain,
+            src: this._getTrackPath(this.trackHistory[this.currentIndex])
+        };
     }
 
     static _getTrackPath(trackItem) {
@@ -148,21 +161,21 @@ class AudioPlayer {
         const fadeOut = () => {
             this.isPlaystateFading = true;
 
-            if (this.audioContext.volume - volumeStep > 0) {
-                this.audioContext.volume -= volumeStep;
+            if (this.audio.volume - volumeStep > 0) {
+                this.audio.volume -= volumeStep;
                 setTimeout(fadeOut, fadeMS / 10);
             } else {
-                this.audioContext.pause();
+                this.audio.pause();
                 this.isPlaystateFading = false;
             }
         };
 
         const fadeIn = () => {
-            this.audioContext.play();
+            this.audio.play();
             this.isPlaystateFading = true;
 
-            if (this.audioContext.volume + volumeStep < this.volume) {
-                this.audioContext.volume += volumeStep;
+            if (this.audio.volume + volumeStep < this.volume) {
+                this.audio.volume += volumeStep;
                 setTimeout(fadeIn, fadeMS / 10);
             } else {
                 this.isPlaystateFading = false;
@@ -185,23 +198,22 @@ class AudioPlayer {
         if (isFloat) {
             if (value >= 0 && value <= 1.0) {
                 this.volume = value;
-                this.audioContext.volume = value;
+                this.audio.volume = value;
             }
         } else {
             if (value >= 0 && value <= 100) {
                 this.volume = value / 100;
-                this.audioContext.volume = value / 100;
+                this.audio.volume = value / 100;
             }
         }
     }
 
     static skipPrevious() {
-        const track = this._pickPreviousTrack();
+        const trackData = this._pickPreviousTrack();
         
-        if (track) {
-            this.audioContext.src = track;
-            this.togglePlaystate({ forcePlay: true });
-        }
+        this.audioGainNode.gain.value = trackData.gain;
+        this.audio.src = trackData.src;
+        this.togglePlaystate({ forcePlay: true });
     }
 
     static togglePlaystate(opts = {}) {
@@ -219,15 +231,14 @@ class AudioPlayer {
         }
 
         const play = () => {
-            if (this.audioContext.src !== "") {
+            if (this.audio.src !== "") {
                 this._handlePlaystateFading("+");
             } else {
-                const track = this._pickNextTrack();
+                const trackData = this._pickNextTrack();
         
-                if (track) {
-                    this.audioContext.src = track;
-                    this._handlePlaystateFading("+");
-                }
+                this.audioGainNode.gain.value = trackData.gain;
+                this.audio.src = trackData.src;
+                this._handlePlaystateFading("+");
             }
 
             return false;
@@ -242,16 +253,15 @@ class AudioPlayer {
             return forcePlay ? play() : (forcePause ? pause() : null);
         }
 
-        return this.audioContext.paused ? play() : pause();
+        return this.audio.paused ? play() : pause();
     }
 
     static skipNext() {
-        const track = this._pickNextTrack();
+        const trackData = this._pickNextTrack();
         
-        if (track) {
-            this.audioContext.src = track;
-            this.togglePlaystate({ forcePlay: true });
-        }
+        this.audioGainNode.gain.value = trackData.gain;
+        this.audio.src = trackData.src;
+        this.togglePlaystate({ forcePlay: true });
 
         if (this.standardQueue.length <= 5 || this.shuffleQueue.length <= 5) {
             this._generateQueues();
