@@ -38,11 +38,6 @@ class AudioPlayer {
         this.audioContext.addEventListener("timeupdate", () => {
             UI.Playbar.handleTimelineUpdate();
         });
-        window.electronAPI.handleRequestNormalizedGains(async (e, sources, sourcePath) => {
-            const args = [sources, sourcePath];
-            const normalizedGains = await Utilities.AudioNormalizer.getNormalizedGainsFromSources(...args);
-            window.electronAPI.provideNormalizedGains(normalizedGains);
-        });
     }
 
     static _beforeExit() {

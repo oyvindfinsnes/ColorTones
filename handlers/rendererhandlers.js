@@ -1,4 +1,4 @@
-const { dialog, ipcMain } = require("electron");
+const { dialog, ipcMain, BrowserWindow } = require("electron");
 const { parseFile } = require("music-metadata");
 const path = require("path");
 const got = require("got");
@@ -160,14 +160,47 @@ class Modal {
                 }
             }
 
+            /* 
+                Making a temporary window to use the built-in Web Audio API
+                AudioContext when processing the files, resulting in a gain value
+                per file that is applied on runtime to adjust all the volumes
+                into being more equal to each other (audio normalization)
+            */
             const initiateRequestNormalizedGains = () => {
                 return new Promise(resolve => {
-                    ipcMain.on("provideNormalizedGains", (e, normalizedGains) => {
-                        resolve(normalizedGains);
+                    let processingWindow = new BrowserWindow({
+                        show: false,
+                        webPreferences: { preload: path.join(__dirname, "..", "preload.js") }
                     });
 
-                    const args = ["handleRequestNormalizedGains", sources, sourcePath];
-                    global.sharedState.mainWindow.webContents.send(...args);
+                    const content = `
+                        data:text/html;charset=utf-8,
+                        <body>
+                            <script src="core/components/Utilities.js"></script>
+                            <script>
+                                window.electronAPI.handleRequestNormalizedGains(async (e, sources, sourcePath) => {
+                                    console.log("we are in here heeheheh");
+                                    const args = [sources, sourcePath];
+                                    const normalizedGains = await Utilities.AudioNormalizer.getNormalizedGainsFromSources(...args);
+                                    window.electronAPI.provideNormalizedGains(normalizedGains);
+                                });
+                            </script>
+                        </body>
+                    `;
+                    
+                    processingWindow.loadURL(content, { baseURLForDataURL: `file://${__dirname}/../app/` });
+
+                    processingWindow.once("ready-to-show", () => {
+                        ipcMain.on("provideNormalizedGains", (e, normalizedGains) => {
+                            processingWindow.close();
+                            processingWindow = null;
+                            
+                            resolve(normalizedGains);
+                        });
+    
+                        const args = ["handleRequestNormalizedGains", sources, sourcePath];
+                        processingWindow.webContents.send(...args);    
+                    });
                 });
             }
 

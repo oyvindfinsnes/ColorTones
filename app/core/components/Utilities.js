@@ -248,7 +248,7 @@ class Utilities {
                 let finishedTasks = 0;
                 const startSize = sources.length;
                 const audioCtx = new AudioContext();
-                const MAX_CONCURRENT = Math.floor(window.navigator.hardwareConcurrency / 4);
+                const MAX_CONCURRENT = window.navigator.hardwareConcurrency;
 
                 const initiateNewNormalizedGain = () => {
                     activeTasks++;
