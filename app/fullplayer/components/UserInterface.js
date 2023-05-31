@@ -401,23 +401,22 @@ class UI {
         }
 
         static handleTimelineUpdate() {
-            const { currentTime, duration } = AudioPlayer.audio;
-
             if (!UI.isTimelineSeeking) {
-                UI.inpTimeline.value = currentTime;
+                UI.inpTimeline.value = AudioPlayer.audio.currentTime;
                 UI.inpTimeline.dispatchEvent(new Event("input"));
-            }
-
-            if (currentTime == duration) {
-                AudioPlayer.skipNext();
             }
         }
 
         static handleToggleButton(toggle) {
-            if (toggle.id == "btnShuffle") {
-                toggle.classList.contains("active")
-                    ? AudioPlayer.setPlaymodeShuffle()
-                    : AudioPlayer.setPlaymodeStandard();
+            switch (toggle.id) {
+                case "btnShuffle":
+                    toggle.classList.contains("active")
+                        ? AudioPlayer.setPlaymodeShuffle()
+                        : AudioPlayer.setPlaymodeStandard();
+                    break;
+                case "btnRepeat":
+                    AudioPlayer.setRepeat(toggle.classList.contains("active"));
+                    break;
             }
         }
 

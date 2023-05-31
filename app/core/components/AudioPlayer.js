@@ -3,6 +3,7 @@ class AudioPlayer {
         this.PLAYMODE_STANDARD = "standard";
         this.PLAYMODE_SHUFFLE = "shuffle";
         this.playMode = this.PLAYMODE_STANDARD;
+        this.isRepeating = false;
         
         this.audio = new Audio();
         this.audioCtx = new AudioContext();
@@ -42,6 +43,7 @@ class AudioPlayer {
             UI.Playbar.handleTrackDetailsChange();
         });
         this.audio.addEventListener("timeupdate", () => {
+            this.handleCurrentPlaytime();
             UI.Playbar.handleTimelineUpdate();
         });
     }
@@ -186,6 +188,19 @@ class AudioPlayer {
         else if (operator === "-") fadeOut();
     }
 
+    static handleCurrentPlaytime() {
+        const { currentTime, duration } = this.audio;
+
+        if (currentTime == duration) {
+            if (this.isRepeating) {
+                this.audio.currentTime = 0;
+                this.togglePlaystate({ forcePlay: true });
+            } else {
+                this.skipNext();
+            }
+        }
+    }
+
     // Public members ==========================================================
 
     static getCurrentTrackItem() {
@@ -275,6 +290,14 @@ class AudioPlayer {
 
     static setPlaymodeShuffle() {
         this.playMode = this.PLAYMODE_SHUFFLE;
+    }
+
+    static setRepeat(shouldRepeat = null) {
+        if (shouldRepeat == null) {
+            this.isRepeating = !this.isRepeating;
+        } else {
+            this.isRepeating = shouldRepeat;
+        }
     }
 
     static updateCurrentSourcePath(sourcePath) {
