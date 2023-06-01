@@ -575,7 +575,6 @@ body {
     padding: 10px 20px;
     border-radius: 5px;
     width: calc(100% - 20px);
-    transition: background 0.1s linear, box-shadow 0.1s linear;
 }
 
 .main-panel .panels .panel .panel-content .panel-item:hover {

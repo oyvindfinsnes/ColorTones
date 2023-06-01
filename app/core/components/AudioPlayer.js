@@ -46,6 +46,11 @@ class AudioPlayer {
             this.handleCurrentPlaytime();
             UI.Playbar.handleTimelineUpdate();
         });
+        ["play", "pause"].forEach(evt => {
+            this.audio.addEventListener(evt, () => {
+                UI.Playbar.handleAudioPlaystate();
+            });
+        });
     }
 
     static _beforeExit() {
@@ -231,19 +236,15 @@ class AudioPlayer {
         this.togglePlaystate({ forcePlay: true });
     }
 
+    static isPaused() {
+        return this.audio.paused;
+    }
+
     static togglePlaystate(opts = {}) {
         const forcePlay = opts.hasOwnProperty("forcePlay") && opts.forcePlay;
         const forcePause = opts.hasOwnProperty("forcePause") && opts.forcePause;
 
-        if (this.isPlaystateFading) return true;
-
-        if (this.playMode === this.PLAYMODE_STANDARD) {
-            if (this.standardQueue.length === 0) return true;
-        }
-
-        if (this.playMode === this.PLAYMODE_SHUFFLE) {
-            if (this.shuffleQueue.length === 0) return true;
-        }
+        if (this.currentSourcePath == null) return;
 
         const play = () => {
             if (this.audio.src !== "") {
@@ -255,20 +256,23 @@ class AudioPlayer {
                 this.audio.src = trackData.src;
                 this._handlePlaystateFading("+");
             }
-
-            return false;
-        };
+        }
 
         const pause = () => {
             this._handlePlaystateFading("-");
-            return true;
-        };
-
-        if (forcePlay || forcePause) {
-            return forcePlay ? play() : (forcePause ? pause() : null);
         }
 
-        return this.audio.paused ? play() : pause();
+        switch (true) {
+            case forcePlay:
+                play();
+                break;
+            case forcePause:
+                pause();
+                break;
+            default:
+                this.audio.paused ? play() : pause();
+                break;
+        }
     }
 
     static skipNext() {

@@ -99,10 +99,10 @@ class UI {
             UI.Playbar.handleSkipPrevious();
         });
         window.electronAPI.globalPlayPause(() => {
-            UI.Playbar.handlePlaystate();
+            AudioPlayer.togglePlaystate();
         });
         UI.btnPlay.addEventListener("click", () => {
-            UI.Playbar.handlePlaystate();
+            AudioPlayer.togglePlaystate();
         });
         window.electronAPI.globalNextTrack(() => {
             UI.Playbar.handleSkipNext();
@@ -259,8 +259,10 @@ class UI {
 
         static async handleLinkClicked(evtType, targetLinkItem) {
             [...document.querySelectorAll("[data-targetpanel]")].forEach(async linkItem => {
-                linkItem.classList.remove("active");
-                
+                if (evtType == "click") {
+                    linkItem.classList.remove("active");
+                }
+
                 if (linkItem == targetLinkItem) {
                     if (targetLinkItem.classList.contains("general-item")) {
                         linkItem.classList.add("active");
@@ -274,7 +276,7 @@ class UI {
                             
                             await AudioPlayer.storeSourcesFromSourcePath(sourcePath);
                             AudioPlayer.updateCurrentSourcePath(sourcePath);
-                            UI.Playbar.handlePlaystate();
+                            AudioPlayer.togglePlaystate();
                         }
                     }
                 }
@@ -430,8 +432,8 @@ class UI {
             AudioPlayer.skipPrevious();
         }
 
-        static handlePlaystate() {
-            const isPaused = AudioPlayer.togglePlaystate();
+        static handleAudioPlaystate() {
+            const isPaused = AudioPlayer.isPaused();
             
             const btn = UI.btnPlay.firstElementChild;
             const { playsrc, pausesrc } = btn.dataset;
