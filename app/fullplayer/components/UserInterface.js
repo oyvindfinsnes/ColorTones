@@ -327,7 +327,7 @@ class UI {
                 panelItems.push(`
                     <div class="panel-item" data-filename="${filename}">
                         <div class="panel-button">
-                            <img class="track-play" src="../assets/icon/ui/play-white.png" />
+                            <img class="track-play" src="../assets/icon/ui/play_white.png" />
                         </div>
                         <div>
                             ${i + 1}

@@ -1,4 +1,4 @@
-const { app, Menu, Tray, BrowserWindow, globalShortcut } = require("electron");
+const { app, Menu, Tray, BrowserWindow, globalShortcut, nativeImage } = require("electron");
 const schedule = require("node-schedule");
 const sqlite3 = require("sqlite3");
 const path = require("path");
@@ -33,7 +33,9 @@ const createMainWindow = () => {
     const iconPath = path.join(__dirname, "app", "assets", "icon", "app", "256x256.png");
     
     const tray = new Tray(iconPath);
-    const template = [{ label: "Quit", click: () => mainWindow.close() }];
+    const template = [
+        { label: "Exit", click: () => mainWindow.close() }
+    ];
     tray.setContextMenu(Menu.buildFromTemplate(template));
     tray.on("click", () => mainWindow.show());
 
@@ -54,6 +56,26 @@ const createMainWindow = () => {
     mainWindow.once("ready-to-show", () => mainWindow.show());
     mainWindow.loadURL(path.join(__dirname, "app", "fullplayer", "index.html"));
 
+    const iconBase = path.join(__dirname, "app", "assets", "icon", "ui");
+    const prevButton = path.join(iconBase, "skip_previous.png");
+    const playButton = path.join(iconBase, "play_white.png");
+    const pauseButton = path.join(iconBase, "pause_white.png");
+    const nextButton = path.join(iconBase, "skip_next.png");
+    mainWindow.setThumbarButtons([
+        {
+            icon: prevButton,
+            click () { console.log("prev") }
+        },
+        {
+            icon: playButton,
+            click () { console.log("play") }
+        },
+        {
+            icon: nextButton,
+            click () { console.log("next") }
+        }
+    ]);
+    
     setTimeout(() => mainWindow.webContents.openDevTools(), 1000);
 }
 
