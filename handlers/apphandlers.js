@@ -18,6 +18,14 @@ const registerAppHandlers = () => {
     ipcMain.on("setAppBackground", (e, color) => {
         global.sharedState.mainWindow.setBackgroundColor(color);
     });
+    global.sharedState["mainWindow"].on("move", () => {
+        const bounds = global.sharedState["mainWindow"].getBounds();
+        global.sharedState["config"].setWindowPosition(bounds.x, bounds.y);
+    });
+    global.sharedState["mainWindow"].on("resize", () => {
+        const bounds = global.sharedState["mainWindow"].getBounds();
+        global.sharedState["config"].setWindowSize(bounds.width, bounds.height);
+    });
 }
 
 module.exports = { registerAppHandlers };
