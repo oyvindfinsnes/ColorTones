@@ -1,5 +1,4 @@
-const { app, globalShortcut } = require("electron");
-const schedule = require("node-schedule");
+const { app } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -29,7 +28,7 @@ const getDatabasePath = () => {
     return path.join(getResourcesPath(), "appdata.sqlite");
 }
 
-const setup = () => {
+app.whenReady().then(() => {
     global.sharedState = {};
     global.sharedState.config = new Config(getResourcesPath());
     global.sharedState.database = new Database(getDatabasePath());
@@ -37,17 +36,4 @@ const setup = () => {
     createMainWindow();
     registerMainHandlers();
     registerRendererHandlers();
-}
-
-app.whenReady().then(() => {
-    setup();
-
-    schedule.scheduleJob("*/15 * * * *", () => {
-        global.sharedState.config.save();
-    });
-
-    app.on("will-quit", () => {
-        globalShortcut.unregisterAll();
-        global.sharedState.config.save();
-    });
 });

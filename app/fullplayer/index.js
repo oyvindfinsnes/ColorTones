@@ -5,16 +5,35 @@ const disableBuiltinMediaKeys = () => {
     navigator.mediaSession.setActionHandler("seekforward", () => { return false });
     navigator.mediaSession.setActionHandler("previoustrack", () => { return false });
     navigator.mediaSession.setActionHandler("nexttrack", () => { return false });
-};
+}
 
-const initComponents = () => {
-    AudioPlayer.init();
-    UI.init();
-};
+const registerSavingDataForConfigListener = () => {
+    window.electronAPI.requestAllDataForConfig(() => {
+        const currentTrack = AudioPlayer.trackHistory.length > 0
+            ? AudioPlayer.trackHistory[0]
+            : null;
+        const data = {
+            audio: {
+                volume: AudioPlayer.audio.volume,
+                muted: AudioPlayer.audio.muted,
+                repeat: AudioPlayer.isRepeating,
+                shuffle: AudioPlayer.playMode == AudioPlayer.PLAYMODE_SHUFFLE,
+                currentTrack,
+                currentOrigin: AudioPlayer.currentSourcePath
+            }
+        };
+        
+        window.electronAPI.receiveAllDataForConfig(data);
+    });
+}
 
-const setup = () => {
-    initComponents();
+window.addEventListener("DOMContentLoaded", async () => {
+    const configData = {
+        audio: await window.electronAPI.requestAudioPlayerData()
+    };
+
+    AudioPlayer.init(configData.audio);
+    UI.init(configData);
     disableBuiltinMediaKeys();
-};
-
-window.addEventListener("DOMContentLoaded", () => setup());
+    registerSavingDataForConfigListener();
+});

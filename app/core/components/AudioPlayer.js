@@ -1,5 +1,5 @@
 class AudioPlayer {
-    static init() {
+    static async init(initialData) {
         this.PLAYMODE_STANDARD = "standard";
         this.PLAYMODE_SHUFFLE = "shuffle";
         this.playMode = this.PLAYMODE_STANDARD;
@@ -9,7 +9,7 @@ class AudioPlayer {
         this.audioCtx = new AudioContext();
         this.audioSource = this.audioCtx.createMediaElementSource(this.audio);
         this.audioGainNode = this.audioCtx.createGain();
-        this.volume = 0.1;
+        this.volume = initialData.volume;
         this.currentIndex = 0;
         
         /* 
@@ -31,6 +31,11 @@ class AudioPlayer {
         this.audio.volume = this.volume;
         this.audioGainNode.gain.value = 1.0;
 
+        if (initialData.currentOrigin != null) {
+            await this.storeSourcesFromSourcePath(initialData.currentOrigin);
+            this.updateCurrentSourcePath(initialData.currentOrigin);
+        }
+
         this._setupListeners();
     }
 
@@ -51,10 +56,6 @@ class AudioPlayer {
                 UI.Playbar.handleAudioPlaystate();
             });
         });
-    }
-
-    static _beforeExit() {
-        // save current track
     }
 
     static _findSourceIndexFromFilename(filename) {
@@ -112,6 +113,18 @@ class AudioPlayer {
                 this.shuffleQueue = [...shuffleQueue];
             } else {
                 this.shuffleQueue = [...this.shuffleQueue, ...shuffleQueue];
+            }
+        }
+
+        if (this.trackHistory.length > 150) {
+            this.trackHistory.length = 150;
+
+            // Protect against playing track that doesn't exist in history anymore
+            if (this.currentIndex > this.trackHistory.length - 1) {
+                // Set it to one less than the (new) end so we can seamlessly
+                // play the next available track in history
+                this.currentIndex = this.trackHistory.length - 2;
+                this._pickPreviousTrack();
             }
         }
     }
@@ -212,23 +225,23 @@ class AudioPlayer {
         return this.trackHistory[this.currentIndex];
     }
 
-    static setVolume(value, isFloat = false) {
+    static setVolume(volume, isFloat = false) {
         if (this.isPlaystateFading) return false;
 
         if (isFloat) {
-            if (value >= 0 && value <= 1.0) {
-                this.volume = value;
-                this.audio.volume = value;
-            }
+            volume = Utilities.clamp(volume, 0, 1.0);
         } else {
-            if (value >= 0 && value <= 100) {
-                this.volume = value / 100;
-                this.audio.volume = value / 100;
-            }
+            volume = Utilities.clamp(volume, 0, 100);
+            volume /= 100;
         }
+
+        this.volume = volume;
+        this.audio.volume = volume;
     }
 
     static skipPrevious() {
+        if (this.currentSourcePath == null) return false;
+
         const trackData = this._pickPreviousTrack();
         
         this.audioGainNode.gain.value = trackData.gain;
@@ -276,6 +289,8 @@ class AudioPlayer {
     }
 
     static skipNext() {
+        if (this.currentSourcePath == null) return false;
+
         const trackData = this._pickNextTrack();
         
         this.audioGainNode.gain.value = trackData.gain;

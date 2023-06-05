@@ -20,8 +20,18 @@ class Utilities {
         return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
-    static pathToHTMLSafeString(sourcePath) {
-        return sourcePath.replace(/[\\\/|\:]/g, "");
+    static clamp = (value, min, max) => {
+        if (value < min) {
+            value = min;
+        } else if (value > max) {
+            value = max;
+        }
+
+        return value;
+    }
+
+    static pathToHTMLSafeString(path) {
+        return path.replace(/[\\\/|\:]/g, "");
     }
 
     static basename(path) {

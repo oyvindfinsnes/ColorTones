@@ -1,5 +1,5 @@
 class UI {
-    static init() {
+    static init(initialData) {
         this.COLORS = {
             bg: "#121212",
             accent1: "#B3005E",
@@ -39,17 +39,16 @@ class UI {
         this.btnPlay = document.querySelector("#btnPlay");
         this.btnSkipNext = document.querySelector("#btnSkipNext");
         this.btnExpand = document.querySelector("#btnExpand");
-        this.toggleButtons = [
-            document.querySelector("#btnShuffle"),
-            document.querySelector("#btnRepeat"),
-            document.querySelector("#btnEnhance")
-        ];
+        this.btnShuffle = document.querySelector("#btnShuffle");
+        this.btnRepeat = document.querySelector("#btnRepeat");
+        this.btnEnhance = document.querySelector("#btnEnhance");
+        this.toggleButtons = [this.btnShuffle, this.btnRepeat, this.btnEnhance];
         this.inpVolume = document.querySelector("#inpVolume");
 
         this.isTimelineSeeking = false;
 
         this._setupListeners();
-        this._setup();
+        this._setup(initialData);
     }
 
     static _setupListeners() {
@@ -118,7 +117,6 @@ class UI {
         });
         UI.toggleButtons.forEach(toggle => {
             toggle.addEventListener("click", () => {
-                toggle.classList.toggle("active");
                 UI.Playbar.handleToggleButton(toggle);
             });
         });
@@ -129,7 +127,7 @@ class UI {
         });
     }
 
-    static async _setup() {
+    static async _setup(initialData) {
         UI.setAppColors();
         
         const args = [UI.COLORS.accent1, UI.COLORS.accent2];
@@ -144,6 +142,14 @@ class UI {
 
         UI.inpVolume.value = AudioPlayer.volume * 100;
         UI.inpVolume.dispatchEvent(new Event("input"));
+
+        if (initialData.audio.shuffle == true) {
+            UI.Playbar.handleToggleButton(UI.btnShuffle);
+        }
+
+        if (initialData.audio.repeat == true) {
+            UI.Playbar.handleToggleButton(UI.btnRepeat);
+        }
     }
 
     static setAppColors() {
@@ -416,13 +422,15 @@ class UI {
         }
 
         static handleToggleButton(toggle) {
+            toggle.classList.toggle("active");
+            
             switch (toggle.id) {
-                case "btnShuffle":
+                case UI.btnShuffle.id:
                     toggle.classList.contains("active")
                         ? AudioPlayer.setPlaymodeShuffle()
                         : AudioPlayer.setPlaymodeStandard();
                     break;
-                case "btnRepeat":
+                case UI.btnRepeat.id:
                     AudioPlayer.setRepeat(toggle.classList.contains("active"));
                     break;
             }
