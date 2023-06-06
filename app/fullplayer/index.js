@@ -9,16 +9,15 @@ const disableBuiltinMediaKeys = () => {
 
 const registerSavingDataForConfigListener = () => {
     window.electronAPI.requestAllDataForConfig(() => {
-        const currentTrack = AudioPlayer.trackHistory.length > 0
-            ? AudioPlayer.trackHistory[0]
-            : null;
+        const hasTrackHistory = AudioPlayer.trackHistory.length > 0;
         const data = {
             audio: {
-                volume: AudioPlayer.audio.volume,
+                volume: AudioPlayer.audio.volume.toFixed(5),
                 muted: AudioPlayer.audio.muted,
                 repeat: AudioPlayer.isRepeating,
                 shuffle: AudioPlayer.playMode == AudioPlayer.PLAYMODE_SHUFFLE,
-                currentTrack,
+                currentTime: AudioPlayer.audio.currentTime,
+                currentTrack: hasTrackHistory ? AudioPlayer.trackHistory[0] : null,
                 currentOrigin: AudioPlayer.currentSourcePath
             }
         };

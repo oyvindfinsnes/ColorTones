@@ -150,6 +150,8 @@ class UI {
         if (initialData.audio.repeat == true) {
             UI.Playbar.handleToggleButton(UI.btnRepeat);
         }
+
+        UI.Playbar.handleTimelineUpdate();
     }
 
     static setAppColors() {
@@ -385,9 +387,10 @@ class UI {
                 const filename = e.target.classList.contains("track-play")
                     && e.target.parentElement.parentElement.dataset.filename;
 
-                /* if (filename) {
+                if (filename) {
                     AudioPlayer.updateCurrentSourcePath(sourcePath);
-                } */
+                    AudioPlayer.insertTrack(filename, true);
+                }
             });
             
             const observer = new IntersectionObserver(([e]) => {
@@ -400,7 +403,11 @@ class UI {
 
     static Playbar = class {
         static handleTrackDetailsChange() {
-            const { title, artist, duration, img } = AudioPlayer.getCurrentTrackItem();
+            const trackDetails = AudioPlayer.getCurrentTrackItem();
+
+            if (trackDetails == null) return false;
+
+            const { title, artist, duration, img } = trackDetails;
             const elapsed = Utilities.formatSecondsToTimestamp(0);
             const total = Utilities.formatSecondsToTimestamp(duration);
 

@@ -34,6 +34,8 @@ class AudioPlayer {
         if (initialData.currentOrigin != null) {
             await this.storeSourcesFromSourcePath(initialData.currentOrigin);
             this.updateCurrentSourcePath(initialData.currentOrigin);
+            this.insertTrack(initialData.currentTrack);
+            this.audio.currentTime = initialData.currentTime;
         }
 
         this._setupListeners();
@@ -48,7 +50,7 @@ class AudioPlayer {
             UI.Playbar.handleTrackDetailsChange();
         });
         this.audio.addEventListener("timeupdate", () => {
-            this.handleCurrentPlaytime();
+            this._handleCurrentPlaytime();
             UI.Playbar.handleTimelineUpdate();
         });
         ["play", "pause"].forEach(evt => {
@@ -206,7 +208,7 @@ class AudioPlayer {
         else if (operator === "-") fadeOut();
     }
 
-    static handleCurrentPlaytime() {
+    static _handleCurrentPlaytime() {
         const { currentTime, duration } = this.audio;
 
         if (currentTime == duration) {
@@ -222,7 +224,11 @@ class AudioPlayer {
     // Public members ==========================================================
 
     static getCurrentTrackItem() {
-        return this.trackHistory[this.currentIndex];
+        if (this.trackHistory.length > 0) {
+            return this.trackHistory[this.currentIndex];
+        }
+
+        return null;
     }
 
     static setVolume(volume, isFloat = false) {
@@ -244,9 +250,11 @@ class AudioPlayer {
 
         const trackData = this._pickPreviousTrack();
         
-        this.audioGainNode.gain.value = trackData.gain;
-        this.audio.src = trackData.src;
-        this.togglePlaystate({ forcePlay: true });
+        if (trackData) {
+            this.audio.src = trackData.src;
+            this.audioGainNode.gain.value = trackData.gain;
+            this.togglePlaystate({ forcePlay: true });
+        }
     }
 
     static isPaused() {
@@ -263,10 +271,19 @@ class AudioPlayer {
             if (this.audio.src !== "") {
                 this._handlePlaystateFading("+");
             } else {
-                const trackData = this._pickNextTrack();
+                let trackData;
+                
+                if (this.trackHistory.length > 0) {
+                    trackData = {
+                        src: this._getTrackPath(this.trackHistory[0]),
+                        gain: this.trackHistory[0].normalizedgain
+                    };
+                } else {
+                    trackData = this._pickNextTrack();
+                }
         
-                this.audioGainNode.gain.value = trackData.gain;
                 this.audio.src = trackData.src;
+                this.audioGainNode.gain.value = trackData.gain;
                 this._handlePlaystateFading("+");
             }
         }
@@ -293,12 +310,35 @@ class AudioPlayer {
 
         const trackData = this._pickNextTrack();
         
-        this.audioGainNode.gain.value = trackData.gain;
-        this.audio.src = trackData.src;
-        this.togglePlaystate({ forcePlay: true });
+        if (trackData) {
+            this.audio.src = trackData.src;
+            this.audioGainNode.gain.value = trackData.gain;
+            this.togglePlaystate({ forcePlay: true });
+        }
 
         if (this.standardQueue.length <= 5 || this.shuffleQueue.length <= 5) {
             this._generateQueues();
+        }
+    }
+
+    static insertTrack(trackData, forcePlay = false) {
+        if (this.currentSourcePath == null) {
+            return false;
+        }
+
+        if (typeof trackData != "object") {
+            const trackIndex = this._findSourceIndexFromFilename(trackData);
+            trackData = this.audioSources[this.currentSourcePath][trackIndex - 1];
+        }
+
+        this.trackHistory.unshift(trackData);
+        UI.Playbar.handleTrackDetailsChange();
+        this.regenerateStandardQueueOnNextPlay = true;
+
+        if (forcePlay) {
+            this.audio.src = this._getTrackPath(trackData);
+            this.audioGainNode.gain.value = trackData.normalizedgain;
+            this.togglePlaystate({ forcePlay: true });
         }
     }
 
