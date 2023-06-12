@@ -322,7 +322,7 @@ class AudioPlayer {
     }
 
     static insertTrack(trackData, forcePlay = false) {
-        if (this.currentSourcePath == null) {
+        if (this.currentSourcePath == null || trackData == null) {
             return false;
         }
 

@@ -20,14 +20,8 @@ class Utilities {
         return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
-    static clamp = (value, min, max) => {
-        if (value < min) {
-            value = min;
-        } else if (value > max) {
-            value = max;
-        }
-
-        return value;
+    static clamp(value, min, max) {
+        return value > max ? max : (value < min ? min : value);
     }
 
     static pathToHTMLSafeString(path) {
@@ -191,7 +185,11 @@ class Utilities {
         static compute = inputColor => {
             const hexToRgb = hex => {
                 const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+                return result ? [
+                        parseInt(result[1], 16),
+                        parseInt(result[2], 16),
+                        parseInt(result[3], 16)
+                    ] : null;
             }
         
             let bestResult = null;
@@ -215,8 +213,8 @@ class Utilities {
     static AudioNormalizer = class {
         /*
             Function gotten from https://github.com/est31/js-audio-normalizer
-            which partially implements the ReplayGain algorithm, a way to
-            measure the perceived loudness of audio data (normalization)
+            which partially implements the ReplayGain algorithm, a way to measure
+            (and in our case normalize) the perceived loudness of audio data
         */
         static _getNormalizationGain = async (fullPath, audioCtx) => {
             return new Promise(normalizationGainResolve => {
@@ -290,16 +288,16 @@ class Utilities {
     }
 }
 
-// CSSFilterGenerator child classes ============================================
+// Instantiable classes ========================================================
 Utilities.CSSFilterGenerator.Color = class Color {
     constructor(r, g, b) {
         this.set(r, g, b);
     }
 
     set(r, g, b) {
-        this.r = this.clamp(r);
-        this.g = this.clamp(g);
-        this.b = this.clamp(b);
+        this.r = Utilities.clamp(r, 0, 255);
+        this.g = Utilities.clamp(g, 0, 255);
+        this.b = Utilities.clamp(b, 0, 255);
     }
 
     hueRotate(angle = 0) {
@@ -363,9 +361,9 @@ Utilities.CSSFilterGenerator.Color = class Color {
     }
 
     multiply(matrix) {
-        const newR = this.clamp(this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2]);
-        const newG = this.clamp(this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5]);
-        const newB = this.clamp(this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8]);
+        const newR = Utilities.clamp(this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2], 0, 255);
+        const newG = Utilities.clamp(this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5], 0, 255);
+        const newB = Utilities.clamp(this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8], 0, 255);
         this.r = newR;
         this.g = newG;
         this.b = newB;
@@ -379,15 +377,15 @@ Utilities.CSSFilterGenerator.Color = class Color {
     }
 
     linear(slope = 1, intercept = 0) {
-        this.r = this.clamp(this.r * slope + intercept * 255);
-        this.g = this.clamp(this.g * slope + intercept * 255);
-        this.b = this.clamp(this.b * slope + intercept * 255);
+        this.r = Utilities.clamp(this.r * slope + intercept * 255, 0, 255);
+        this.g = Utilities.clamp(this.g * slope + intercept * 255, 0, 255);
+        this.b = Utilities.clamp(this.b * slope + intercept * 255, 0, 255);
     }
 
     invert(value = 1) {
-        this.r = this.clamp((value + this.r / 255 * (1 - 2 * value)) * 255);
-        this.g = this.clamp((value + this.g / 255 * (1 - 2 * value)) * 255);
-        this.b = this.clamp((value + this.b / 255 * (1 - 2 * value)) * 255);
+        this.r = Utilities.clamp((value + this.r / 255 * (1 - 2 * value)) * 255, 0, 255);
+        this.g = Utilities.clamp((value + this.g / 255 * (1 - 2 * value)) * 255, 0, 255);
+        this.b = Utilities.clamp((value + this.b / 255 * (1 - 2 * value)) * 255, 0, 255);
     }
 
     hsl() {
@@ -420,10 +418,6 @@ Utilities.CSSFilterGenerator.Color = class Color {
         }
 
         return { h: h * 100, s: s * 100, l: l * 100 };
-    }
-
-    clamp(value) {
-        return value > 255 ? 255 : (value < 0 ? 0 : value);
     }
 }
 

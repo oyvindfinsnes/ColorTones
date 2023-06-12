@@ -1,16 +1,267 @@
 <style>
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Control containers */
+    .modal .control-container {
+        --control-width: 100px;
+        display: grid;
+        align-items: center;
+        justify-content: space-between;
+        grid-template-rows: 20px 1fr;
+        grid-template-columns: 1fr var(--control-width);
+        width: 100%;
+        gap: 10px 30px;
+        padding: 20px 0;
+        margin-bottom: 20px;
+    }
+
+    .modal .control-container .control-title {
+        display: block;
+        font-size: 16px;
+        grid-column: 1 / 3;
+    }
+
+    .modal .control-container .control-text {
+        flex: 1;
+        font-size: 14px;
+        color: var(--tertiary-text-color);
+    }
+
+    /* Toggle buttons */
+    .modal .control-container .toggle-button {
+        position: relative;
+        cursor: pointer;
+        width: var(--control-width);
+        height: 30px;
+        font-size: 12px;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+
+    .modal .control-container .toggle-button .background,
+    .modal .control-container .toggle-button .thumb,
+    .modal .control-container .toggle-button .foreground {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+    }
+
+    .modal .control-container .toggle-button .background {
+        width: 100%;
+        background-color: #323232;
+    }
+
+    .modal .control-container .toggle-button .thumb {
+        width: 50%;
+        border-radius: 20px;
+        background-color: #454545;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .modal .control-container .toggle-button .foreground {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        text-transform: uppercase;
+    }
+
+    .modal .control-container .toggle-button[data-state="true"] > .thumb {
+        left: 50%;
+        background-color: var(--highlight-color);
+    }
+
+    /* Range sliders */
+    .modal .control-container .range-slider::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--thumb-left);
+        height: 100%;
+        border-radius: 100px;
+        background-color: var(--highlight-color);
+    }
+
+    .modal .control-container .range-slider {
+        --thumb-left: 0;
+        position: relative;
+        width: var(--control-width);
+        height: 16px;
+        border-radius: 20px;
+        background-color: #323232;
+    }
+
+    .modal .control-container .range-slider::after {
+        content: attr(data-value);
+        pointer-events: none;
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        left: var(--thumb-left);
+        padding: 5px 8px;
+        font-size: 12px;
+        border-radius: 100px;
+        transform: translate(-50%, -150%);
+        transition: opacity 0.1s ease-in-out;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal .control-container .range-slider.active::after,
+    .modal .control-container .range-slider:has(.thumb:hover)::after {
+        opacity: 1;
+    }
+
+    .modal .control-container .range-slider .thumb {
+        position: absolute;
+        cursor: pointer;
+        top: -4px;
+        left: var(--thumb-left);
+        width: 22px;
+        height: 22px;
+        border-radius: 100px;
+        transform: translateX(-50%);
+        background-color: #505050;
+        transition: background 0.1s linear;
+    }
+
+    .modal .control-container .range-slider .thumb:hover,
+    .modal .control-container .range-slider.active > .thumb {
+        background-color: #606060;
+    }
+
+    /* Theme picker */
+    .modal .themes-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .modal .themes-container .theme-container {
+        border-radius: 10px;
+        border: 2px solid #282828;
+        transition: box-shadow 0.1s linear;
+    }
+
+    .modal .themes-container .theme-container:not(.selected):has(.theme-title:hover) {
+        box-shadow: 2px 2px 10px #000000;
+    }
+
+    .modal .themes-container .theme-container.selected {
+        outline: 1px solid var(--highlight-color);
+    }
+
+    .modal .themes-container .theme-container .theme-title {
+        cursor: pointer;
+        font-size: 14px;
+        padding: 10px 15px;
+        background-color: #282828;
+    }
+
+    .modal .themes-container .theme-container .theme-colors {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin: 20px 0;
+    }
+
+    .modal .themes-container .theme-container .theme-colors .color {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        padding: 2px;
+        border-radius: 30px;
+        background-clip: content-box;
+        border: 1px solid transparent;
+    }
+
+    .modal .themes-container .theme-container .theme-colors .color:hover {
+        border-color:#ffb700;
+    }
+
+    /* Color picker */
+    .modal .color-picker-container {
+        position: absolute;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        top: 50%;
+        left: 50%;
+        z-index: 10;
+        width: 300px;
+        height: 360px;
+        border-radius: 10px;
+        transform: translate(-50%, -50%);
+        background: var(--modal-background);
+        animation: fadeIn 0.2s ease forwards;
+        border: 1px solid var(--scrollbar-thumb-color);
+    }
+
+    .modal .color-picker-container.active {
+        display: flex;
+    }
+
+    .modal .color-picker-container .details {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .modal .color-picker-container .details .before-after {
+        --before: #ffffff;
+        --after: #ffffff;
+        position: relative;
+        width: 100px;
+        height: 25px;
+        display: flex;
+        border-radius: 10px;
+        border: 1px solid #282828;
+    }
+
+    .modal .color-picker-container .details .before-after::before,
+    .modal .color-picker-container .details .before-after::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 50%;
+        height: 100%;
+    }
+
+    .modal .color-picker-container .details .before-after::before {
+        left: 0;
+        background-color: var(--before);
+    }
+
+    .modal .color-picker-container .details .before-after::after {
+        right: 0;
+        background-color: var(--after);
+    }
+
+    .modal .color-picker-container .details .color-code {
+        user-select: all;
+        font-size: 15px;
+        color: var(--secondary-text-color)
+    }
+
     .modal .container {
         position: relative;
         width: 90vh;
         height: 90vh;
-        padding: 20px;
+        padding: 30px;
         border-radius: 20px;
         box-sizing: border-box;
-        box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
         background: var(--modal-background);
+        box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
     }
 
-    .modal .container .modal-close {
+    .modal .container .modal-close,
+    .modal .color-picker-container .color-picker-close {
         position: absolute;
         cursor: pointer;
         top: 10px;
@@ -21,25 +272,349 @@
         transition: opacity 0.2s ease;
     }
 
-    .modal .container .modal-close:hover {
+    .modal .color-picker-container .color-picker-close {
+        top: 8px;
+        right: 8px;
+        width: 20px;
+    }
+
+    .modal .container .modal-close:hover,
+    .modal .color-picker-container .color-picker-close:hover {
         opacity: 1;
+    }
+
+    .modal .container .content {
+        display: grid;
+        grid-template-rows: 60px 1fr 50px;
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal .container .content .title {
+        display: block;
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .modal .container .content .tabs .tab-titles {
+        display: inline-flex;
+        width: 100%;
+    }
+
+    .modal .container .content .tabs .tab-titles .title:first-child {
+        border-radius: 10px 0 0 0;
+    }
+
+    .modal .container .content .tabs .tab-titles .title:last-child {
+        border-radius: 0 10px 0 0;
+    }
+
+    .modal .container .content .tabs .tab-titles .title {
+        cursor: pointer;
+        width: 100%;
+        font-size: 14px;
+        padding: 15px 0;
+        text-transform: uppercase;
+        color: var(--tertiary-text-color);
+        border-bottom: 3px solid var(--scrollbar-thumb-color);
+        transition: all 0.1s linear;
+    }
+
+    .modal .container .content .tabs .tab-titles .title:hover {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .modal .container .content .tabs .tab-titles .title.active {
+        color: var(--primary-text-color);
+        border-bottom-color: var(--highlight-color);
+    }
+
+    .modal .container .content .tabs .tab-contents {
+        position: relative;
+        margin-top: 10px;
+    }
+
+    .modal .container .content .tabs .tab-contents .tab {
+        display: none;
+        padding: 20px;
+        overflow-y: auto;
+        height: calc(90vh - 260px); /* Beautiful hack */
+        animation: fadeIn 0.2s linear forwards;
+    }
+
+    .modal .container .content .tabs .tab-contents .tab::-webkit-scrollbar {
+        appearance: none;
+        width: 8px;
+    }
+
+    .modal .container .content .tabs .tab-contents .tab::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-thumb-color);
+    }
+
+    .modal .container .content .tabs .tab-contents .tab::-webkit-scrollbar-thumb:hover {
+        background-color: var(--highlight-color);
+    }
+
+    .modal .container .content .tabs .tab-contents .tab.active {
+        display: block;
+    }
+
+    .modal .container .content .buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal .container .content .buttons .button {
+        cursor: pointer;
+        outline: none;
+        border: none;
+        width: 150px;
+        opacity: 1;
+        font-size: 12px;
+        padding: 12px 0;
+        font-weight: bold;
+        border-radius: 5px;
+        text-transform: uppercase;
+        transition: opacity 1s ease;
+        color: var(--primary-text-color);
+        background-color: var(--highlight-color);
     }
 </style>
 
 <div class="container">
     <img class="modal-close" src="../assets/icon/ui/close.png" />
+    
+    <div class="color-picker-container">
+        <img class="color-picker-close" src="../assets/icon/ui/close.png" />
+        <div id="colorPicker"></div>
+        <div class="details">
+            <div class="before-after"></div>
+            <div class="color-code">#000000</div>
+        </div>
+    </div>
 
     <div class="content">
-        <span class="location-title">Settings</span>
+        <span class="title">Settings</span>
+
+        <div class="tabs">
+            <div class="tab-titles">
+                <span class="title interface active" data-target="interface">interface</span>
+                <span class="title themes" data-target="themes">themes</span>
+                <span class="title profile" data-target="profile">profile</span>
+            </div>
+
+            <div class="tab-contents">
+                <div class="tab" data-tab="interface">
+                    <div class="control-container">
+                        <div class="control-title">Background Opacity</div>
+                        <div class="control-text">Controls how opaque the background animation is (higher means more visible)</div>
+                        <div class="range-slider" data-value="0">
+                            <div class="thumb"></div>
+                        </div>
+                    </div>
+
+                    <div class="control-container">
+                        <div class="control-title">Background Animation</div>
+                        <div class="control-text">Controls whether or not the background should be animated</div>
+                        <div class="toggle-button" data-state="false">
+                            <div class="background"></div>
+                            <div class="thumb"></div>
+                            <div class="foreground"><span>off</span><span>on</span></div>
+                        </div>
+                    </div>
+
+                    <div class="control-container">
+                        <div class="control-title">Control Bar Animation</div>
+                        <div class="control-text">Controls whether or not the player control bar at the bottom should be animated</div>
+                        <div class="toggle-button" data-state="false">
+                            <div class="background"></div>
+                            <div class="thumb"></div>
+                            <div class="foreground"><span>off</span><span>on</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab active" data-tab="themes">
+                    <div class="themes-container">
+                        <div id="userTheme1" class="theme-container">
+                            <div class="theme-title">Blood Moon</div>
+                            <div class="theme-colors">
+                                <div class="color" data-color="#121212"></div>
+                                <div class="color" data-color="#b3005e"></div>
+                                <div class="color" data-color="#e90064"></div>
+                                <div class="color" data-color="#d72227"></div>
+                            </div>
+                        </div>
+
+                        <div id="userTheme2" class="theme-container">
+                            <div class="theme-title">Unicorn Starlight</div>
+                            <div class="theme-colors">
+                                <div class="color" data-color="#420e4e"></div>
+                                <div class="color" data-color="#9c1b37"></div>
+                                <div class="color" data-color="#d72227"></div>
+                                <div class="color" data-color="#fd751f"></div>
+                            </div>
+                        </div>
+
+                        <div id="userTheme3" class="theme-container">
+                            <div class="theme-title">Placeholder</div>
+                            <div class="theme-colors">
+                                <div class="color" data-color="#222222"></div>
+                                <div class="color" data-color="#444444"></div>
+                                <div class="color" data-color="#666666"></div>
+                                <div class="color" data-color="#888888"></div>
+                            </div>
+                        </div>
+
+                        <div id="userTheme4" class="theme-container">
+                            <div class="theme-title">Placeholder</div>
+                            <div class="theme-colors">
+                                <div class="color" data-color="#222222"></div>
+                                <div class="color" data-color="#444444"></div>
+                                <div class="color" data-color="#666666"></div>
+                                <div class="color" data-color="#888888"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab" data-tab="profile">
+                    profile
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <input class="button cancel" type="button" value="cancel" />
+            <input class="button save" type="button" value="save changes" />
+        </div>
     </div>
 </div>
 
 <script>
+    window.activeThemeColor = null;
+    window.currentRangeSlider = null;
+
     document.querySelector(".modal-close").addEventListener("click", () => {
+        // Cleanup so that next activation can still use the same variables
+        delete window.activeThemeColor;
+        delete window.currentRangeSlider;
+
         document.querySelector(".modal").innerHTML = "";
         document.querySelector(".modal").classList.remove("active");
+        
         [...document.querySelectorAll("script")].forEach(script => {
             if (script.id !== "") document.body.removeChild(script);
+        });
+    });
+
+    // Title buttons for switching current active tab
+    [...document.querySelectorAll(".tab-titles .title")].forEach(trigger => {
+        trigger.addEventListener("click", e => {
+            [...document.querySelectorAll(".tab-titles .title")].forEach(trigger => {
+                trigger.classList.remove("active");
+                const selector = `[data-tab="${trigger.dataset.target}"]`;
+                document.querySelector(selector).classList.remove("active");
+                
+                if (trigger == e.currentTarget) {
+                    trigger.classList.add("active");
+                    document.querySelector(selector).classList.add("active");
+                }
+            });
+        });
+    });
+
+    // All modal toggle buttons
+    [...document.querySelectorAll(".toggle-button")].forEach(toggle => {
+        toggle.addEventListener("click", e => {
+            const state = e.currentTarget.dataset.state;
+            e.currentTarget.dataset.state = state == "false" ? "true" : "false";
+        });
+    });
+
+    // All modal range sliders
+    document.querySelector(".modal").addEventListener("mousemove", e => {
+        if (window.currentRangeSlider == null) return false;
+
+        if (e.buttons != 1) {
+            window.currentRangeSlider.classList.remove("active");
+            window.currentRangeSlider = null;
+        } else {
+            const { left, width } = window.currentRangeSlider.getBoundingClientRect();
+            const [startX, endX] = [0, width];
+            let pxPosition = e.clientX - left;
+
+            pxPosition = Math.floor(Utilities.clamp(pxPosition, startX, endX));
+            window.currentRangeSlider.dataset.value = pxPosition;
+            window.currentRangeSlider.style.setProperty("--thumb-left", pxPosition + "px");
+        }
+    });
+    document.querySelector(".modal").addEventListener("mouseup", e => {
+        if (window.currentRangeSlider != null) {
+            window.currentRangeSlider.classList.remove("active");
+            window.currentRangeSlider = null;
+        }
+    });
+    [...document.querySelectorAll(".range-slider")].forEach(slider => {
+        slider.addEventListener("mousedown", () => {
+            window.currentRangeSlider = slider;
+            slider.classList.add("active");
+        });
+    });
+
+    // Color picker
+    window.colorPicker = new iro.ColorPicker("#colorPicker", {
+        width: 230,
+        layout: [
+            { component: iro.ui.Box },
+            { component: iro.ui.Slider,
+                options: { sliderType: "hue", sliderSize: 20 }
+            }
+        ]
+    });
+    window.colorPicker.on("color:change", color => {
+        const hex = color.hexString;
+        const beforeAfter = ".color-picker-container .before-after";
+        const colorCode = ".color-picker-container .color-code";
+        
+        document.querySelector(beforeAfter).style.setProperty("--after", hex);
+        document.querySelector(colorCode).textContent = hex;
+
+        if (window.activeThemeColor != null) {
+            window.activeThemeColor.style.setProperty("background-color", hex);
+        }
+    });
+    document.querySelector(".color-picker-close").addEventListener("click", () => {
+        window.activeThemeColor = null;
+        document.querySelector(".color-picker-container").classList.remove("active");
+    });
+    [...document.querySelectorAll(".theme-colors .color")].forEach(color => {
+        color.style.setProperty("background-color", color.dataset.color);
+        
+        color.addEventListener("click", () => {
+            const hex = color.dataset.color;
+            const beforeAfter = ".color-picker-container .before-after";
+
+            window.activeThemeColor = color;
+            
+            window.colorPicker.color.hexString = hex;
+            document.querySelector(beforeAfter).style.setProperty("--before", hex);
+
+            document.querySelector(".color-picker-container").classList.add("active");
+        });
+    });
+
+    // Selecting a theme
+    [...document.querySelectorAll(".theme-title")].forEach(trigger => {
+        trigger.addEventListener("click", e => {
+            [...document.querySelectorAll(".theme-container")].forEach(container => {
+                container.classList.remove("selected");
+
+                if (container.querySelector(".theme-title") == e.currentTarget) {
+                    container.classList.add("selected");
+                }
+            });
         });
     });
 </script>

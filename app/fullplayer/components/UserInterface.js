@@ -14,7 +14,6 @@ class UI {
         this.profile = document.querySelector("#profile");
         this.profileDropdown = document.querySelector("#profileDropdown");
         this.profileDropdownOptions = [
-            document.querySelector("#dropdownProfile"),
             document.querySelector("#dropdownSettings"),
             document.querySelector("#dropdownQuit")
         ];
@@ -217,9 +216,6 @@ class UI {
 
         static handleDropdownOption(option) {
             switch (option.id) {
-                case "dropdownProfile":
-                    UI.Modal.handleOpen("profileModal");
-                    break;
                 case "dropdownSettings":
                     UI.Modal.handleOpen("settingsModal");
                     break;

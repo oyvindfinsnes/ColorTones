@@ -51,7 +51,7 @@
     --primary-text-color: #ffffff;
     --secondary-text-color: #dddddd;
     --tertiary-text-color: #dddddd;
-    --scrollbar-thumb-color: #ffffff60;
+    --scrollbar-thumb-color: #ffffff50;
     --modal-background: radial-gradient(#202020, #121212);
     
     --bg-opacity: 0.3;
@@ -542,7 +542,6 @@ body {
 
 .main-panel .panels .panel .panel-content .panel-item .panel-button {
     opacity: 0;
-    transition: opacity 0.1s linear;
 }
 
 .main-panel .panels .panel .panel-content .panel-item .panel-button:hover {
@@ -565,7 +564,7 @@ body {
 }
 
 .main-panel .panels .panel .panel-header-bottom.is-pinned {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .main-panel .panels .panel .panel-content .panel-item {

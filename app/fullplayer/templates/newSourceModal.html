@@ -8,7 +8,8 @@
         position: relative;
         width: 90vh;
         height: 90vh;
-        padding: 20px;
+        padding: 30px;
+        overflow: hidden;
         border-radius: 20px;
         box-sizing: border-box;
         box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
@@ -30,37 +31,36 @@
         opacity: 1;
     }
 
-    .modal .container .content {
-        display: grid;
-        grid-template-rows: 1fr 1fr 2fr 3fr 1fr;
-        align-items: center;
+    .modal .container .infinite-loader-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 1;
         width: 100%;
         height: 100%;
+        z-index: 100;
+        pointer-events: none;
+        background-color: rgba(0, 0, 0, 0.7);
+        transition: opacity 0.2s linear;
     }
 
-    .modal .container .content .location-title {
-        width: 100%;
-        font-size: 24px;
-        text-align: center;
+    .modal .container .infinite-loader-container.inactive {
+        opacity: 0;
     }
 
-    .modal .container .content .location-subtitle {
-        display: block;
-        margin-bottom: 15px;
-    }
-
-    .modal .container .content .infinite-loader {
-        position: relative;
-        opacity: 1;
-        width: 80%;
-        height: 10px;
+    .modal .container .infinite-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 380px;
+        height: 12px;
         overflow: hidden;
         border-radius: 10px;
-        justify-self: center;
+        transform: translate(-50%, -50%);
         transition: opacity 1s ease;
     }
 
-    .modal .container .content .infinite-loader::after {
+    .modal .container .infinite-loader::after {
         content: "";
         position: absolute;
         width: 100%;
@@ -76,6 +76,25 @@
         background-size: 200% 100%;
         animation: infiniteLoading 3s linear infinite;
     }
+
+    .modal .container .content {
+        display: grid;
+        grid-template-rows: 1fr 2fr 3fr 1fr;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal .container .content .location-title {
+        width: 100%;
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .modal .container .content .location-subtitle {
+        display: block;
+        margin-bottom: 15px;
+    }
     
     .modal .container .content .file-data,
     .modal .container .content .reverse-order {
@@ -84,8 +103,7 @@
     }
 
     .modal .container .content .file-data.inactive,
-    .modal .container .content .reverse-order.inactive,
-    .modal .container .content .infinite-loader.inactive {
+    .modal .container .content .reverse-order.inactive {
         opacity: 0;
         pointer-events: none;
     }
@@ -194,10 +212,12 @@
 <div class="container">
     <img class="modal-close" src="../assets/icon/ui/close.png" />
 
+    <div class="infinite-loader-container inactive">
+        <div class="infinite-loader"></div>
+    </div>
+
     <div class="content">
         <span class="location-title">Add a new source to your library</span>
-        
-        <div class="infinite-loader inactive"></div>
 
         <div class="file-data inactive">
             <span class="location-subtitle">Some or all of the files in the selected folder are missing crucial metadata. Select an option below so that we can derive this data using the file names instead.</span>
@@ -249,12 +269,12 @@
         document.querySelector(".reverse-order").classList.add("inactive");
         document.querySelector(".location-submit").classList.add("disabled");
 
-        document.querySelector(".infinite-loader").classList.remove("inactive");
+        document.querySelector(".infinite-loader-container").classList.remove("inactive");
 
         const { sources, sourcePath, pickedExample } = await window.electronAPI.folderSelectSource();
 
         if (sourcePath !== null) {
-            document.querySelector(".infinite-loader").classList.add("inactive");
+            document.querySelector(".infinite-loader-container").classList.add("inactive");
 
             if (pickedExample !== null) {
                 document.querySelector(".file-data").classList.remove("inactive");
@@ -267,7 +287,7 @@
             document.querySelector(".container").dataset.sources = sources;
             document.querySelector(".container").dataset.sourcePath = sourcePath;
         } else {
-            document.querySelector(".infinite-loader").classList.add("inactive");
+            document.querySelector(".infinite-loader-container").classList.add("inactive");
         }
     });
 
