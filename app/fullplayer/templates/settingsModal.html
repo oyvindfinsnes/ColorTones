@@ -76,33 +76,20 @@
     }
 
     /* Range sliders */
-    .modal .control-container .range-slider::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: var(--thumb-left);
-        height: 100%;
-        border-radius: 100px;
-        background-color: var(--highlight-color);
-    }
-
-    .modal .control-container .range-slider {
-        --thumb-left: 0;
+    .modal .control-container .range-slider-container {
+        --slider-thumb-size: 20px;
+        --tooltip-left: calc(var(--slider-thumb-size) / 2);
         position: relative;
         width: var(--control-width);
-        height: 16px;
-        border-radius: 20px;
-        background-color: #323232;
     }
 
-    .modal .control-container .range-slider::after {
+    .modal .control-container .range-slider-container::after {
         content: attr(data-value);
         pointer-events: none;
         position: absolute;
         opacity: 0;
         top: 0;
-        left: var(--thumb-left);
+        left: var(--tooltip-left);
         padding: 5px 8px;
         font-size: 12px;
         border-radius: 100px;
@@ -111,27 +98,31 @@
         background-color: rgba(0, 0, 0, 0.7);
     }
 
-    .modal .control-container .range-slider.active::after,
-    .modal .control-container .range-slider:has(.thumb:hover)::after {
-        opacity: 1;
+    .modal .control-container .range-slider-container .range-slider {
+        appearance: none;
+        outline: none;
+        width: 100%;
+        height: 14px;
+        border-radius: 20px;
+        background-color: #323232;
     }
 
-    .modal .control-container .range-slider .thumb {
-        position: absolute;
+    .modal .control-container .range-slider-container .range-slider::-webkit-slider-thumb {
+        appearance: none;
         cursor: pointer;
-        top: -4px;
-        left: var(--thumb-left);
-        width: 22px;
-        height: 22px;
-        border-radius: 100px;
-        transform: translateX(-50%);
         background-color: #505050;
+        width: var(--slider-thumb-size);
+        height: var(--slider-thumb-size);
+        border-radius: var(--slider-thumb-size);
         transition: background 0.1s linear;
     }
 
-    .modal .control-container .range-slider .thumb:hover,
-    .modal .control-container .range-slider.active > .thumb {
+    .modal .control-container .range-slider-container .range-slider::-webkit-slider-thumb:hover {
         background-color: #606060;
+    }
+
+    .modal .control-container .range-slider-container:hover::after {
+        opacity: 1;
     }
 
     /* Theme picker */
@@ -195,15 +186,29 @@
         z-index: 10;
         width: 300px;
         height: 360px;
+        padding-top: 20px;
         border-radius: 10px;
+        border: 1px solid #000000;
         transform: translate(-50%, -50%);
         background: var(--modal-background);
         animation: fadeIn 0.2s ease forwards;
-        border: 1px solid var(--scrollbar-thumb-color);
     }
 
     .modal .color-picker-container.active {
         display: flex;
+    }
+
+    .modal .color-picker-container .dragbar {
+        position: absolute;
+        cursor: grab;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 20px;
+    }
+
+    .modal .color-picker-container .dragbar:active {
+        cursor: grabbing;
     }
 
     .modal .color-picker-container .details {
@@ -216,12 +221,10 @@
     .modal .color-picker-container .details .before-after {
         --before: #ffffff;
         --after: #ffffff;
+        pointer-events: none;
         position: relative;
         width: 100px;
         height: 25px;
-        display: flex;
-        border-radius: 10px;
-        border: 1px solid #282828;
     }
 
     .modal .color-picker-container .details .before-after::before,
@@ -234,19 +237,41 @@
     }
 
     .modal .color-picker-container .details .before-after::before {
+        pointer-events: all;
+        cursor: pointer;
         left: 0;
+        z-index: 1;
+        border-radius: 10px 0 0 10px;
         background-color: var(--before);
+    }
+
+    .modal .color-picker-container .details .before-after:hover::before {
+        outline: 1px solid #ffb700;
     }
 
     .modal .color-picker-container .details .before-after::after {
         right: 0;
+        border-radius: 0 10px 10px 0;
         background-color: var(--after);
     }
 
     .modal .color-picker-container .details .color-code {
-        user-select: all;
+        user-select: auto;
+        outline: none;
+        border: none;
+        width: 100px;
         font-size: 15px;
-        color: var(--secondary-text-color)
+        padding: 6px 10px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        text-transform: uppercase;
+        background-color: #323232;
+        color: var(--primary-text-color);
+        transition: background 0.2s linear;
+    }
+
+    .modal .color-picker-container .details .color-code:focus {
+        background-color: #404040;
     }
 
     .modal .container {
@@ -386,11 +411,12 @@
     <img class="modal-close" src="../assets/icon/ui/close.png" />
     
     <div class="color-picker-container">
+        <div class="dragbar"></div>
         <img class="color-picker-close" src="../assets/icon/ui/close.png" />
         <div id="colorPicker"></div>
         <div class="details">
             <div class="before-after"></div>
-            <div class="color-code">#000000</div>
+            <input class="color-code" type="text" placeholder="#000000" />
         </div>
     </div>
 
@@ -409,8 +435,8 @@
                     <div class="control-container">
                         <div class="control-title">Background Opacity</div>
                         <div class="control-text">Controls how opaque the background animation is (higher means more visible)</div>
-                        <div class="range-slider" data-value="0">
-                            <div class="thumb"></div>
+                        <div class="range-slider-container" data-value="0">
+                            <input class="range-slider" type="range" min="0" max="100" value="0" />
                         </div>
                     </div>
 
@@ -494,12 +520,10 @@
 
 <script>
     window.activeThemeColor = null;
-    window.currentRangeSlider = null;
 
     document.querySelector(".modal-close").addEventListener("click", () => {
         // Cleanup so that next activation can still use the same variables
         delete window.activeThemeColor;
-        delete window.currentRangeSlider;
 
         document.querySelector(".modal").innerHTML = "";
         document.querySelector(".modal").classList.remove("active");
@@ -534,32 +558,21 @@
     });
 
     // All modal range sliders
-    document.querySelector(".modal").addEventListener("mousemove", e => {
-        if (window.currentRangeSlider == null) return false;
-
-        if (e.buttons != 1) {
-            window.currentRangeSlider.classList.remove("active");
-            window.currentRangeSlider = null;
-        } else {
-            const { left, width } = window.currentRangeSlider.getBoundingClientRect();
-            const [startX, endX] = [0, width];
-            let pxPosition = e.clientX - left;
-
-            pxPosition = Math.floor(Utilities.clamp(pxPosition, startX, endX));
-            window.currentRangeSlider.dataset.value = pxPosition;
-            window.currentRangeSlider.style.setProperty("--thumb-left", pxPosition + "px");
-        }
-    });
-    document.querySelector(".modal").addEventListener("mouseup", e => {
-        if (window.currentRangeSlider != null) {
-            window.currentRangeSlider.classList.remove("active");
-            window.currentRangeSlider = null;
-        }
-    });
     [...document.querySelectorAll(".range-slider")].forEach(slider => {
-        slider.addEventListener("mousedown", () => {
-            window.currentRangeSlider = slider;
-            slider.classList.add("active");
+        slider.addEventListener("input", () => {
+            const { min, max } = slider;
+            const { width } = slider.getBoundingClientRect();
+            const property = getComputedStyle(slider).getPropertyValue("--slider-thumb-size");
+            const halfThumb = parseInt(property.replace("px", ""), 10) / 2;
+            const [newMin, newMax] = [halfThumb, width - halfThumb];
+
+            const percent = Utilities.remap(slider.value, min, max, 0, 100);
+            const leftPx = Utilities.remap(slider.value, min, max, newMin, newMax);
+            const sliderProgress = `linear-gradient(to right,var(--highlight-color) 0%,var(--highlight-color) ${percent}%,#323232 ${percent}%,#323232 100%)`;
+            
+            slider.style.background = sliderProgress;
+            slider.parentElement.dataset.value = slider.value;
+            slider.parentElement.style.setProperty("--tooltip-left", leftPx + "px");
         });
     });
 
@@ -569,25 +582,61 @@
         layout: [
             { component: iro.ui.Box },
             { component: iro.ui.Slider,
-                options: { sliderType: "hue", sliderSize: 20 }
+                options: { sliderType: "hue", sliderSize: 18 }
             }
         ]
     });
     window.colorPicker.on("color:change", color => {
-        const hex = color.hexString;
+        const hex = window.colorPicker.color.hexString;
         const beforeAfter = ".color-picker-container .before-after";
-        const colorCode = ".color-picker-container .color-code";
+        const colorCode = document.querySelector(".color-picker-container .color-code");
         
         document.querySelector(beforeAfter).style.setProperty("--after", hex);
-        document.querySelector(colorCode).textContent = hex;
+        
+        if (document.activeElement != colorCode) {
+            colorCode.value = hex;
+        }
 
         if (window.activeThemeColor != null) {
             window.activeThemeColor.style.setProperty("background-color", hex);
         }
     });
+    document.querySelector(".modal").addEventListener("mousedown", e => {
+        const colorCode = document.querySelector(".color-picker-container .color-code");
+        if (e.target != colorCode) colorCode.blur();
+    });
+    document.querySelector(".color-picker-container .dragbar").addEventListener("mousedown", e => {
+        const el = e.currentTarget.parentElement;
+        const { left, top } = window.getComputedStyle(el);
+        const [offsetX, offsetY] = [
+            e.clientX - parseInt(left, 10),
+            e.clientY - parseInt(top, 10)
+        ];
+        
+        const mouseMoveHandler = e => {
+            el.style.top = `${e.clientY - offsetY}px`;
+            el.style.left = `${e.clientX - offsetX}px`;
+        }
+
+        const resetDrag = () => {
+            window.removeEventListener("mouseup", resetDrag);
+            window.removeEventListener("mousemove", mouseMoveHandler);
+        }
+
+        window.addEventListener("mouseup", resetDrag);
+        window.addEventListener("mousemove", mouseMoveHandler);
+    });
     document.querySelector(".color-picker-close").addEventListener("click", () => {
         window.activeThemeColor = null;
         document.querySelector(".color-picker-container").classList.remove("active");
+    });
+    document.querySelector(".color-picker-container .before-after").addEventListener("click", e => {
+        const hex = getComputedStyle(e.target).getPropertyValue("--before");
+        window.colorPicker.color.set(hex);
+    });
+    document.querySelector(".color-picker-container .color-code").addEventListener("input", e => {
+        // Error is no issue, it will when the user enters any valid hex
+        try { window.colorPicker.color.hexString = e.target.value; } catch(e) {};
     });
     [...document.querySelectorAll(".theme-colors .color")].forEach(color => {
         color.style.setProperty("background-color", color.dataset.color);
