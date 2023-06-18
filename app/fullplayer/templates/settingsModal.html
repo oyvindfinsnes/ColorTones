@@ -148,9 +148,25 @@
 
     .modal .themes-container .theme-container .theme-title {
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         font-size: 14px;
         padding: 10px 15px;
         background-color: #282828;
+    }
+
+    .modal .themes-container .theme-container .theme-delete {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        padding: 5px;
+        flex: 0 0 18px;
+        border-radius: 100%;
+    }
+
+    .modal .themes-container .theme-container .theme-delete:hover {
+        background-color: rgba(0, 0, 0, 0.5);
     }
 
     .modal .themes-container .theme-container .theme-colors {
@@ -209,6 +225,21 @@
 
     .modal .color-picker-container .dragbar:active {
         cursor: grabbing;
+    }
+
+    .modal .color-picker-container .color-picker-close {
+        position: absolute;
+        cursor: pointer;
+        top: 8px;
+        right: 8px;
+        width: 20px;
+        height: auto;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .modal .color-picker-container .color-picker-close:hover {
+        opacity: 1;
     }
 
     .modal .color-picker-container .details {
@@ -274,6 +305,46 @@
         background-color: #404040;
     }
 
+    /* User profile */
+    .modal .profile-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 300px;
+        height: 400px;
+        margin: 0 auto;
+        border-radius: 20px;
+        background-color: #121212;
+        box-shadow: 0 0 15px 1px #000000;
+    }
+
+    .modal .profile-container .profile-picture {
+        width: 140px;
+        height: 140px;
+        border-radius: 100%;
+        margin-bottom: 50px;
+        background: url("../assets/img/default-profile.png") center;
+        background-size: contain;
+    }
+
+    .modal .profile-container .profile-name {
+        outline: none;
+        border: none;
+        width: 150px;
+        font-size: 16px;
+        padding: 8px 20px;
+        text-align: center;
+        border-radius: 10px;
+        background-color: #303030;
+        color: var(--primary-text-color);
+        transition: background 0.2s linear;
+    }
+
+    .modal .profile-container .profile-name:focus {
+        background-color: #383838;
+    }
+
     .modal .container {
         position: relative;
         width: 90vh;
@@ -283,29 +354,6 @@
         box-sizing: border-box;
         background: var(--modal-background);
         box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal .container .modal-close,
-    .modal .color-picker-container .color-picker-close {
-        position: absolute;
-        cursor: pointer;
-        top: 10px;
-        right: 10px;
-        width: 24px;
-        height: auto;
-        opacity: 0.8;
-        transition: opacity 0.2s ease;
-    }
-
-    .modal .color-picker-container .color-picker-close {
-        top: 8px;
-        right: 8px;
-        width: 20px;
-    }
-
-    .modal .container .modal-close:hover,
-    .modal .color-picker-container .color-picker-close:hover {
-        opacity: 1;
     }
 
     .modal .container .content {
@@ -402,14 +450,18 @@
         border-radius: 5px;
         text-transform: uppercase;
         transition: opacity 1s ease;
+        transition: opacity 0.2s linear;
         color: var(--primary-text-color);
         background-color: var(--highlight-color);
+    }
+
+    .modal .container .content .buttons .modal-save.disabled {
+        pointer-events: none;
+        opacity: 0.5;
     }
 </style>
 
 <div class="container">
-    <img class="modal-close" src="../assets/icon/ui/close.png" />
-    
     <div class="color-picker-container">
         <div class="dragbar"></div>
         <img class="color-picker-close" src="../assets/icon/ui/close.png" />
@@ -431,19 +483,19 @@
             </div>
 
             <div class="tab-contents">
-                <div class="tab" data-tab="interface">
+                <div class="tab active" data-tab="interface">
                     <div class="control-container">
                         <div class="control-title">Background Opacity</div>
                         <div class="control-text">Controls how opaque the background animation is (higher means more visible)</div>
                         <div class="range-slider-container" data-value="0">
-                            <input class="range-slider" type="range" min="0" max="100" value="0" />
+                            <input id="settingBackgroundOpacity" class="range-slider" type="range" min="0" max="1" step="0.01" value="0" />
                         </div>
                     </div>
 
                     <div class="control-container">
                         <div class="control-title">Background Animation</div>
                         <div class="control-text">Controls whether or not the background should be animated</div>
-                        <div class="toggle-button" data-state="false">
+                        <div id="settingBackgroundAnimation" class="toggle-button" data-state="false">
                             <div class="background"></div>
                             <div class="thumb"></div>
                             <div class="foreground"><span>off</span><span>on</span></div>
@@ -453,7 +505,7 @@
                     <div class="control-container">
                         <div class="control-title">Control Bar Animation</div>
                         <div class="control-text">Controls whether or not the player control bar at the bottom should be animated</div>
-                        <div class="toggle-button" data-state="false">
+                        <div id="settingPlaybarAnimation" class="toggle-button" data-state="false">
                             <div class="background"></div>
                             <div class="thumb"></div>
                             <div class="foreground"><span>off</span><span>on</span></div>
@@ -461,75 +513,90 @@
                     </div>
                 </div>
 
-                <div class="tab active" data-tab="themes">
-                    <div class="themes-container">
-                        <div id="userTheme1" class="theme-container">
-                            <div class="theme-title">Blood Moon</div>
-                            <div class="theme-colors">
-                                <div class="color" data-color="#121212"></div>
-                                <div class="color" data-color="#b3005e"></div>
-                                <div class="color" data-color="#e90064"></div>
-                                <div class="color" data-color="#d72227"></div>
-                            </div>
-                        </div>
-
-                        <div id="userTheme2" class="theme-container">
-                            <div class="theme-title">Unicorn Starlight</div>
-                            <div class="theme-colors">
-                                <div class="color" data-color="#420e4e"></div>
-                                <div class="color" data-color="#9c1b37"></div>
-                                <div class="color" data-color="#d72227"></div>
-                                <div class="color" data-color="#fd751f"></div>
-                            </div>
-                        </div>
-
-                        <div id="userTheme3" class="theme-container">
-                            <div class="theme-title">Placeholder</div>
-                            <div class="theme-colors">
-                                <div class="color" data-color="#222222"></div>
-                                <div class="color" data-color="#444444"></div>
-                                <div class="color" data-color="#666666"></div>
-                                <div class="color" data-color="#888888"></div>
-                            </div>
-                        </div>
-
-                        <div id="userTheme4" class="theme-container">
-                            <div class="theme-title">Placeholder</div>
-                            <div class="theme-colors">
-                                <div class="color" data-color="#222222"></div>
-                                <div class="color" data-color="#444444"></div>
-                                <div class="color" data-color="#666666"></div>
-                                <div class="color" data-color="#888888"></div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="tab" data-tab="themes">
+                    <div class="themes-container"></div>
                 </div>
 
                 <div class="tab" data-tab="profile">
-                    profile
+                    <div class="profile-container">
+                        <div class="profile-picture"></div>
+                        <input id="settingUsername" class="profile-name" type="text" />
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="buttons">
-            <input class="button cancel" type="button" value="cancel" />
-            <input class="button save" type="button" value="save changes" />
+            <input class="button modal-cancel" type="button" value="cancel" />
+            <input class="button modal-save" type="button" value="save changes" />
         </div>
     </div>
 </div>
 
 <script>
     window.activeThemeColor = null;
+    window.tempSavedSettings = { interface: {}, profile: {}, themes: [] };
+    window.handleSaveButtonActive = () => {
+        const button = document.querySelector(".modal-save");
+        const hasInterface = Object.keys(window.tempSavedSettings.interface).length > 0;
+        const hasProfile = Object.keys(window.tempSavedSettings.profile).length > 0;
 
-    document.querySelector(".modal-close").addEventListener("click", () => {
-        // Cleanup so that next activation can still use the same variables
-        delete window.activeThemeColor;
+        if (!hasInterface && !hasProfile) {
+            button.classList.add("disabled");
+        } else {
+            button.classList.remove("disabled");
+        }
+    }
 
-        document.querySelector(".modal").innerHTML = "";
-        document.querySelector(".modal").classList.remove("active");
-        
-        [...document.querySelectorAll("script")].forEach(script => {
-            if (script.id !== "") document.body.removeChild(script);
+    [
+        document.querySelector(".modal-cancel"),
+        document.querySelector(".modal-save")
+    ].forEach(button => {
+        button.addEventListener("click", () => {
+            if (button.classList.contains("modal-save")) {
+                if (Object.keys(window.tempSavedSettings.interface).length > 0) {
+                    const {
+                        backgroundOpacity,
+                        enableBackgroundAnimation,
+                        enablePlaybarAnimation
+                    } = window.tempSavedSettings.interface;
+                    const { username } = window.tempSavedSettings.profile;
+                    
+                    if (backgroundOpacity != undefined) {
+                        window.configData.interface.backgroundOpacity = backgroundOpacity;
+                        UI.setAppBackgroundOpacity(backgroundOpacity);
+                    }
+
+                    if (enableBackgroundAnimation != undefined) {
+                        window.configData.interface.enableBackgroundAnimation = enableBackgroundAnimation;
+                        enableBackgroundAnimation
+                            ? Utilities.InterfaceEffects.applyBackgroundAnimation()
+                            : Utilities.InterfaceEffects.removeBackgroundAnimation();
+                    }
+
+                    if (enablePlaybarAnimation != undefined) {
+                        window.configData.interface.enablePlaybarAnimation = enablePlaybarAnimation;
+                        UI.Playbar.handleAnimationToggle(enablePlaybarAnimation);
+                    }
+
+                    if (username != undefined) {
+                        window.configData.profile.username = username;
+                        UI.Topbar.handleUpdateUsername();
+                    }
+                }
+            }
+
+            // Cleanup so that next activation can still use the same variables
+            delete window.activeThemeColor;
+            delete window.tempSavedSettings;
+            delete window.handleSaveButtonActive;
+
+            document.querySelector(".modal").innerHTML = "";
+            document.querySelector(".modal").classList.remove("active");
+            
+            [...document.querySelectorAll("script")].forEach(script => {
+                if (script.id !== "") document.body.removeChild(script);
+            });
         });
     });
 
@@ -552,28 +619,90 @@
     // All modal toggle buttons
     [...document.querySelectorAll(".toggle-button")].forEach(toggle => {
         toggle.addEventListener("click", e => {
-            const state = e.currentTarget.dataset.state;
-            e.currentTarget.dataset.state = state == "false" ? "true" : "false";
+            let state = e.currentTarget.dataset.state;
+            
+            // Reverse state and convert to bool
+            state = state == "false" ? true : false;
+            
+            e.currentTarget.dataset.state = state;
+            
+            if (toggle.id == "settingBackgroundAnimation") {
+                if (state == String(window.configData.interface.enableBackgroundAnimation)) {
+                    delete window.tempSavedSettings.interface.enableBackgroundAnimation;
+                } else {
+                    window.tempSavedSettings.interface.enableBackgroundAnimation = state;
+                }
+            } else if (toggle.id == "settingPlaybarAnimation") {
+                if (state == String(window.configData.interface.enablePlaybarAnimation)) {
+                    delete window.tempSavedSettings.interface.enablePlaybarAnimation;
+                } else {
+                    window.tempSavedSettings.interface.enablePlaybarAnimation = state;
+                }
+            }
+
+            window.handleSaveButtonActive();
         });
     });
 
     // All modal range sliders
     [...document.querySelectorAll(".range-slider")].forEach(slider => {
-        slider.addEventListener("input", () => {
-            const { min, max } = slider;
-            const { width } = slider.getBoundingClientRect();
-            const property = getComputedStyle(slider).getPropertyValue("--slider-thumb-size");
-            const halfThumb = parseInt(property.replace("px", ""), 10) / 2;
-            const [newMin, newMax] = [halfThumb, width - halfThumb];
+        ["input", "wheel"].forEach(evt => {
+            slider.addEventListener(evt, e => {
+                let [value, step, min, max] = [
+                    parseFloat(slider.value),
+                    parseFloat(slider.step),
+                    parseFloat(slider.min),
+                    parseFloat(slider.max)
+                ];
 
-            const percent = Utilities.remap(slider.value, min, max, 0, 100);
-            const leftPx = Utilities.remap(slider.value, min, max, newMin, newMax);
-            const sliderProgress = `linear-gradient(to right,var(--highlight-color) 0%,var(--highlight-color) ${percent}%,#323232 ${percent}%,#323232 100%)`;
+                if (e.type == "wheel") {
+                    slider.value = e.deltaY > 0 ? value - step : value + step;
+                    // Get the value this way so that HTML clamps the new value
+                    // for us
+                    value = parseFloat(slider.value);
+                }
+
+                const parent = slider.parentElement;
+                const sliderWidthPx = getComputedStyle(parent).getPropertyValue("--control-width");
+                const sliderWidth = parseInt(sliderWidthPx.replace("px", ""), 10);
+                const thumbSize = getComputedStyle(slider).getPropertyValue("--slider-thumb-size");
+                const halfThumb = parseInt(thumbSize.replace("px", ""), 10) / 2;
+                const [newMin, newMax] = [halfThumb, sliderWidth - halfThumb];
+
+                const percent = Utilities.remap(value, min, max, 0, 100);
+                const leftPx = Utilities.remap(value, min, max, newMin, newMax);
+                const sliderProgress = `linear-gradient(to right,var(--highlight-color) 0%,var(--highlight-color) ${percent}%,#323232 ${percent}%,#323232 100%)`;
+                const decimals = Utilities.decimalPlaces(step);
+                // Ensure the appropriate amount of decimals to avoid the label
+                // number jumping around when getting whole numbers
+                const tooltipValue = value.toFixed(decimals);
+
+                slider.style.background = sliderProgress;
+                parent.dataset.value = tooltipValue;
+                parent.style.setProperty("--tooltip-left", `${leftPx}px`);
             
-            slider.style.background = sliderProgress;
-            slider.parentElement.dataset.value = slider.value;
-            slider.parentElement.style.setProperty("--tooltip-left", leftPx + "px");
-        });
+                if (slider.id == "settingBackgroundOpacity") {
+                    if (value == window.configData.interface.backgroundOpacity) {
+                        delete window.tempSavedSettings.interface.backgroundOpacity;
+                    } else {
+                        window.tempSavedSettings.interface.backgroundOpacity = value;
+                    }
+                }
+
+                window.handleSaveButtonActive();
+            });
+        })
+    });
+
+    // User profile
+    document.querySelector("#settingUsername").addEventListener("input", e => {
+        if (e.target.value == window.configData.profile.username) {
+            delete window.tempSavedSettings.profile.username;
+        } else {
+            window.tempSavedSettings.profile.username = e.target.value;
+        }
+        
+        window.handleSaveButtonActive();
     });
 
     // Color picker
@@ -638,32 +767,93 @@
         // Error is no issue, it will when the user enters any valid hex
         try { window.colorPicker.color.hexString = e.target.value; } catch(e) {};
     });
-    [...document.querySelectorAll(".theme-colors .color")].forEach(color => {
-        color.style.setProperty("background-color", color.dataset.color);
-        
-        color.addEventListener("click", () => {
-            const hex = color.dataset.color;
-            const beforeAfter = ".color-picker-container .before-after";
 
-            window.activeThemeColor = color;
-            
-            window.colorPicker.color.hexString = hex;
-            document.querySelector(beforeAfter).style.setProperty("--before", hex);
+    // Initializing data for tabs
+    [
+        "#settingBackgroundOpacity",
+        "#settingBackgroundAnimation",
+        "#settingPlaybarAnimation"
+    ].forEach(setting => {
+        const config = window.configData.interface;
+        const control = document.querySelector(setting);
 
-            document.querySelector(".color-picker-container").classList.add("active");
-        });
+        switch (setting) {
+            case "#settingBackgroundOpacity":
+                control.value = config.backgroundOpacity;
+                control.dispatchEvent(new Event("input"));
+                break;
+            case "#settingBackgroundAnimation":
+                if (config.enableBackgroundAnimation == true) {
+                    control.dispatchEvent(new Event("click"));
+                }
+                break;
+            case "#settingPlaybarAnimation":
+                if (config.enablePlaybarAnimation == true) {
+                    control.dispatchEvent(new Event("click"));
+                }
+                break;
+        }
     });
 
-    // Selecting a theme
-    [...document.querySelectorAll(".theme-title")].forEach(trigger => {
-        trigger.addEventListener("click", e => {
-            [...document.querySelectorAll(".theme-container")].forEach(container => {
-                container.classList.remove("selected");
+    // Initializing data for profile
+    document.querySelector("#settingUsername").value = window.configData.profile.username;
+    document.querySelector("#settingUsername").dispatchEvent(new Event("input"));
 
-                if (container.querySelector(".theme-title") == e.currentTarget) {
-                    container.classList.add("selected");
+    // Initializing all themes
+    window.configData.themes.forEach(theme => {
+        const themeDelete = theme.id.includes("default")
+            ? ""
+            : `<img class="theme-delete" src="../assets/icon/ui/delete.png" />`;
+        const themeMarkup = `
+            <div class="theme-title">${theme.name} ${themeDelete}</div>
+            <div class="theme-colors">
+                <div class="color" data-color="${theme.colors.bg}"></div>
+                <div class="color" data-color="${theme.colors.accent1}"></div>
+                <div class="color" data-color="${theme.colors.accent2}"></div>
+                <div class="color" data-color="${theme.colors.highlight}"></div>
+            </div>
+        `;
+        
+        const container = document.createElement("DIV");
+        container.id = theme.id;
+        container.innerHTML = themeMarkup;
+        container.classList.add("theme-container");
+        if (theme.selected) container.classList.add("selected");
+
+        container.addEventListener("click", e => {
+            [...document.querySelectorAll(".theme-container")].forEach(otherTheme => {
+                otherTheme.classList.remove("selected");
+
+                if (otherTheme.querySelector(".theme-title") == e.target) {
+                    otherTheme.classList.add("selected");
                 }
             });
         });
+
+        const btnDelete = container.querySelector(".theme-delete");
+        if (btnDelete) {
+            btnDelete.addEventListener("click", e => {
+                const target = container.parentElement.parentElement;
+                document.querySelector(".themes-container").removeChild(target);
+            });
+        }
+
+        [...container.querySelectorAll(".color")].forEach(color => {
+            color.style.setProperty("background-color", color.dataset.color);
+            
+            color.addEventListener("click", () => {
+                const hex = color.dataset.color;
+                const beforeAfter = ".color-picker-container .before-after";
+
+                window.activeThemeColor = color;
+                
+                window.colorPicker.color.hexString = hex;
+                document.querySelector(beforeAfter).style.setProperty("--before", hex);
+
+                document.querySelector(".color-picker-container").classList.add("active");
+            });
+        });
+
+        document.querySelector(".themes-container").appendChild(container);
     });
 </script>

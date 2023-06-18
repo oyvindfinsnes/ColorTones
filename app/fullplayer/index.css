@@ -69,6 +69,10 @@ img {
     -webkit-user-drag: none;
 }
 
+input {
+    font-family: "Poppins";
+}
+
 body {
     display: grid;
     grid-template-columns: var(--navbar-width) 1fr;
@@ -606,7 +610,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .main-panel .panels .panel .panel-content .panel-item div:nth-child(2) img {
@@ -640,6 +644,11 @@ body {
 .playbar .bgimg img {
     filter: var(--highlight-color-from-filter);
     animation: infiniteScroll 120s linear infinite;
+    animation-play-state: running;
+}
+
+.playbar .bgimg.paused img {
+    animation-play-state: paused;
 }
 
 .playbar .controls {

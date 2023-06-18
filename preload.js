@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     handleRequestNormalizedGains: callback => ipcRenderer.on("handleRequestNormalizedGains", callback),
     provideNormalizedGains: (...args) => ipcRenderer.send("provideNormalizedGains", ...args),
     requestTemplate: (...args) => ipcRenderer.invoke("requestTemplate", ...args),
-    requestAudioPlayerData: (...args) => ipcRenderer.invoke("requestAudioPlayerData", ...args),
+    requestConfigData: (...args) => ipcRenderer.invoke("requestConfigData", ...args),
     requestDatabaseInteraction: (...args) => ipcRenderer.invoke("requestDatabaseInteraction", ...args),
     folderSelectSource: () => ipcRenderer.invoke("folderSelectSource"),
     finalizeSourceFiles: (...args) => ipcRenderer.invoke("finalizeSourceFiles", ...args)

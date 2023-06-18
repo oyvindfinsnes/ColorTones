@@ -16,18 +16,31 @@ class Utilities {
             : `${m}:${s >= 10 ? s : "0" + s}`;
     }
     
+    // Proportionally remaps a number from an original range into a new one
     static remap = (val, inMin, inMax, outMin, outMax) => {
         return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
+    // Restrict the value of a number to a specified range
     static clamp(value, min, max) {
         return value > max ? max : (value < min ? min : value);
     }
 
+    // The number of decimal places a number has, if any
+    static decimalPlaces(num) {
+        if (Number.isInteger(num)) {
+            return 0;
+        } else {
+            return num.toString().split(".")[1].length;
+        }
+    }
+
+    // Converts anything OS-pathlike to HTML-safe string that can be used as ID
     static pathToHTMLSafeString(path) {
         return path.replace(/[\\\/|\:]/g, "");
     }
 
+    // Find the last part of an OS-pathlike
     static basename(path) {
         return path.split(/[\\/]/).pop();
     }
@@ -46,7 +59,13 @@ class Utilities {
             }
         }
 
-        static applyBackgroundAnimation(accent1, accent2) {
+        static applyBackgroundAnimation(accent1 = null, accent2 = null) {
+            if (accent1 == null || accent2 == null) {
+                const selectedTheme = window.configData.themes.find(theme => theme.selected);
+                accent1 = selectedTheme.colors.accent1;
+                accent2 = selectedTheme.colors.accent2;
+            }
+
             const totalLights = 20;
             const size = 180;
             const softness = 180;

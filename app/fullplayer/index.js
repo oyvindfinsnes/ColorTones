@@ -9,31 +9,15 @@ const disableBuiltinMediaKeys = () => {
 
 const registerSavingDataForConfigListener = () => {
     window.electronAPI.requestAllDataForConfig(() => {
-        const data = {
-            audio: {
-                volume: AudioPlayer.volume.toFixed(5),
-                muted: AudioPlayer.audio.muted,
-                repeat: AudioPlayer.isRepeating,
-                shuffle: AudioPlayer.playMode == AudioPlayer.PLAYMODE_SHUFFLE,
-                currentTime: AudioPlayer.audio.currentTime,
-                currentTrack: AudioPlayer.trackHistory.length > 0
-                    ? AudioPlayer.trackHistory[0].filename
-                    : null,
-                currentOrigin: AudioPlayer.currentSourcePath
-            }
-        };
-        
-        window.electronAPI.receiveAllDataForConfig(data);
+        window.electronAPI.receiveAllDataForConfig(window.configData);
     });
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-    const configData = {
-        audio: await window.electronAPI.requestAudioPlayerData()
-    };
-
-    AudioPlayer.init(configData.audio);
-    UI.init(configData);
+    window.configData = await window.electronAPI.requestConfigData();
+    
+    AudioPlayer.init();
+    UI.init();
     disableBuiltinMediaKeys();
     registerSavingDataForConfigListener();
 });

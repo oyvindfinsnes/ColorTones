@@ -1,5 +1,5 @@
 class UI {
-    static init(initialData) {
+    static init() {
         this.COLORS = {
             bg: "#121212",
             accent1: "#B3005E",
@@ -12,6 +12,7 @@ class UI {
         this.modal = document.querySelector(".modal");
 
         this.profile = document.querySelector("#profile");
+        this.profileName = document.querySelector("#profile .profile-name");
         this.profileDropdown = document.querySelector("#profileDropdown");
         this.profileDropdownOptions = [
             document.querySelector("#dropdownSettings"),
@@ -28,6 +29,7 @@ class UI {
 
         this.panels = document.querySelector("#panels");
 
+        this.playbarBackground = document.querySelector(".playbar .bgimg");
         this.trackArt = document.querySelector(".track-art img");
         this.trackTitle = document.querySelector(".track-details .track-title");
         this.trackArtist = document.querySelector(".track-details .track-artist");
@@ -47,7 +49,7 @@ class UI {
         this.isTimelineSeeking = false;
 
         this._setupListeners();
-        this._setup(initialData);
+        this._setup();
     }
 
     static _setupListeners() {
@@ -126,11 +128,15 @@ class UI {
         });
     }
 
-    static async _setup(initialData) {
+    static async _setup() {
         UI.setAppColors();
         
-        const args = [UI.COLORS.accent1, UI.COLORS.accent2];
-        Utilities.InterfaceEffects.applyBackgroundAnimation(...args);
+        if (window.configData.interface.enableBackgroundAnimation) {
+            const args = [UI.COLORS.accent1, UI.COLORS.accent2];
+            Utilities.InterfaceEffects.applyBackgroundAnimation(...args);
+        }
+
+        UI.Topbar.handleUpdateUsername();
 
         Utilities.InterfaceEffects.applySoundbarsAnimationStyles();
         
@@ -139,18 +145,20 @@ class UI {
             UI.Navbar.addSource(sourceItem.path);
         }
 
-        UI.inpVolume.value = AudioPlayer.volume * 100;
-        UI.inpVolume.dispatchEvent(new Event("input"));
+        UI.Playbar.handleAnimationToggle(window.configData.interface.enablePlaybarAnimation);
 
-        if (initialData.audio.shuffle == true) {
+        if (window.configData.audio.shuffle == true) {
             UI.Playbar.handleToggleButton(UI.btnShuffle);
         }
 
-        if (initialData.audio.repeat == true) {
+        if (window.configData.audio.repeat == true) {
             UI.Playbar.handleToggleButton(UI.btnRepeat);
         }
 
         UI.Playbar.handleTimelineUpdate();
+
+        UI.inpVolume.value = AudioPlayer.volume * 100;
+        UI.inpVolume.dispatchEvent(new Event("input"));
     }
 
     static setAppColors() {
@@ -165,6 +173,11 @@ class UI {
         root.style.setProperty("--highlight-color", highlight);
         root.style.setProperty("--scrollbar-thumb-color", `${highlight}60`);
         root.style.setProperty("--highlight-color-from-filter", highlightColorFilter);
+    }
+
+    static setAppBackgroundOpacity(opacity) {
+        const root = document.documentElement;
+        root.style.setProperty("--bg-opacity", opacity);
     }
 
     static Modal = class {
@@ -206,6 +219,10 @@ class UI {
     }
 
     static Topbar = class {
+        static handleUpdateUsername() {
+            UI.profileName.textContent = window.configData.profile.username;
+        }
+
         static handleProfileDropdownOpen() {
             UI.profileDropdown.classList.add("show");
         }
@@ -398,6 +415,16 @@ class UI {
     }
 
     static Playbar = class {
+        static handleAnimationToggle(forcePlay = null) {
+            if (forcePlay == null) {
+                UI.playbarBackground.classList.toggle("paused");
+            } else {
+                forcePlay
+                    ? UI.playbarBackground.classList.remove("paused")
+                    : UI.playbarBackground.classList.add("paused");
+            }
+        }
+
         static handleTrackDetailsChange() {
             const trackDetails = AudioPlayer.getCurrentTrackItem();
 

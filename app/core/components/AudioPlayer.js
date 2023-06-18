@@ -1,15 +1,16 @@
 class AudioPlayer {
-    static async init(initialData) {
+    static async init() {
         this.PLAYMODE_STANDARD = "standard";
         this.PLAYMODE_SHUFFLE = "shuffle";
         this.playMode = this.PLAYMODE_STANDARD;
+        this.isMuted = false;
         this.isRepeating = false;
         
         this.audio = new Audio();
         this.audioCtx = new AudioContext();
         this.audioSource = this.audioCtx.createMediaElementSource(this.audio);
         this.audioGainNode = this.audioCtx.createGain();
-        this.volume = initialData.volume;
+        this.volume = window.configData.audio.volume;
         this.currentIndex = 0;
         
         /* 
@@ -31,11 +32,11 @@ class AudioPlayer {
         this.audio.volume = this.volume;
         this.audioGainNode.gain.value = 1.0;
 
-        if (initialData.currentOrigin != null) {
-            await this.storeSourcesFromSourcePath(initialData.currentOrigin);
-            this.updateCurrentSourcePath(initialData.currentOrigin);
-            this.insertTrack(initialData.currentTrack);
-            this.audio.currentTime = initialData.currentTime;
+        if (window.configData.audio.currentOrigin != null) {
+            await this.storeSourcesFromSourcePath(window.configData.audio.currentOrigin);
+            this.updateCurrentSourcePath(window.configData.audio.currentOrigin);
+            this.insertTrack(window.configData.audio.currentTrack);
+            this.audio.currentTime = window.configData.audio.currentTime;
         }
 
         this._setupListeners();
@@ -135,6 +136,8 @@ class AudioPlayer {
         if (this.currentIndex < this.trackHistory.length - 1) {
             this.currentIndex++;
             
+            window.configData.audio.currentTrack = this.trackHistory[this.currentIndex].filename;
+
             return {
                 gain: this.trackHistory[this.currentIndex].normalizedgain,
                 src: this._getTrackPath(this.trackHistory[this.currentIndex])
@@ -162,8 +165,10 @@ class AudioPlayer {
             }
 
             this.trackHistory.unshift(nextItem);
+            window.configData.audio.currentTrack = this.trackHistory[0].filename;
         } else {
             this.currentIndex--;
+            window.configData.audio.currentTrack = this.trackHistory[this.currentIndex].filename;
         }
 
         return {
@@ -211,6 +216,8 @@ class AudioPlayer {
     static _handleCurrentPlaytime() {
         const { currentTime, duration } = this.audio;
 
+        window.configData.audio.currentTime = currentTime;
+
         if (currentTime == duration) {
             if (this.isRepeating) {
                 this.audio.currentTime = 0;
@@ -243,6 +250,7 @@ class AudioPlayer {
 
         this.volume = volume;
         this.audio.volume = volume;
+        window.configData.audio.volume = volume;
     }
 
     static skipPrevious() {
@@ -332,8 +340,11 @@ class AudioPlayer {
         }
 
         this.trackHistory.unshift(trackData);
-        UI.Playbar.handleTrackDetailsChange();
+        
         this.regenerateStandardQueueOnNextPlay = true;
+        window.configData.audio.currentTrack = this.trackHistory[0].filename;
+        
+        UI.Playbar.handleTrackDetailsChange();
 
         if (forcePlay) {
             this.audio.src = this._getTrackPath(trackData);
@@ -344,11 +355,23 @@ class AudioPlayer {
 
     static setPlaymodeStandard() {
         this.playMode = this.PLAYMODE_STANDARD;
+        window.configData.audio.shuffle = false;
         this.regenerateStandardQueueOnNextPlay = true;
     }
 
     static setPlaymodeShuffle() {
         this.playMode = this.PLAYMODE_SHUFFLE;
+        window.configData.audio.shuffle = true;
+    }
+
+    static setMute(shouldMute = null) {
+        if (shouldMute == null) {
+            this.isMuted = !this.isMuted;
+        } else {
+            this.isMuted = shouldMute;
+        }
+
+        window.configData.audio.muted = this.isMuted;
     }
 
     static setRepeat(shouldRepeat = null) {
@@ -357,11 +380,15 @@ class AudioPlayer {
         } else {
             this.isRepeating = shouldRepeat;
         }
+
+        window.configData.audio.repeat = this.isRepeating;
     }
 
     static updateCurrentSourcePath(sourcePath) {
         if (this.currentSourcePath != sourcePath) {
             this.currentSourcePath = sourcePath;
+            window.configData.audio.currentOrigin = this.currentSourcePath;
+            
             this._generateQueues({ regenerate: true });
         }
     }
