@@ -1,11 +1,7 @@
 class UI {
     static init() {
-        this.COLORS = {
-            bg: "#121212",
-            accent1: "#B3005E",
-            accent2: "#E90064",
-            highlight: "#d72227"
-        };
+        const selectedTheme = window.configData.themes.find(theme => theme.selected);
+        this.COLORS = selectedTheme.colors;
 
         this.customDoubleClickData = { timer: 0, delay: 200, prevent: false };
 
